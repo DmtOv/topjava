@@ -21,8 +21,4 @@ public class UserMealWithExceed {
         this.calories = calories;
         this.exceed = exceed;
     }
-
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
 }
