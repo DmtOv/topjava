@@ -18,6 +18,22 @@ public class MealWithExceed {
         this.exceed = exceed;
     }
 
+    public String getDateTime() {
+        return dateTime.toLocalDate().toString() + " " + dateTime.toLocalTime();
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getCalories() {
+        return calories;
+    }
+
+    public boolean isExceed() {
+        return exceed;
+    }
+
     @Override
     public String toString() {
         return "UserMealWithExceed{" +
