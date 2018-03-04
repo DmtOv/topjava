@@ -1,8 +1,9 @@
+.gitignore
 .idea
 out
 target
 *.iml
 log
-
+.DS_Store
 
 

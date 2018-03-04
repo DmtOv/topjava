@@ -13,11 +13,11 @@
         <th>Description</th>
         <th>Calories</th>
     </tr>
-    <c:forEach var="num" items="${meals}">
-        <tr bgcolor="${num.isExceed() ? 'red' : 'green'}">
-            <td><c:out value="${num.getDateTime()}"/></td>
-            <td><c:out value="${num.getDescription()}"/></td>
-            <td><c:out value="${num.getCalories()}"/></td>
+    <c:forEach var="meal" items="${meals}">
+        <tr bgcolor="${meal.isExceed() ? 'red' : 'green'}">
+            <td><c:out value="${meal.getDateTime()}"/></td>
+            <td><c:out value="${meal.getDescription()}"/></td>
+            <td><c:out value="${meal.getCalories()}"/></td>
         </tr>
     </c:forEach>
 </table>
