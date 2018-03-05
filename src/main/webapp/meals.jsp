@@ -23,6 +23,9 @@
     </c:forEach>
 </table>
 
-<a href="add.jsp">add</a>
+<a href="add.jsp">
+    <h4>Add</h4>
+</a>
+
 </body>
 </html>

@@ -41,6 +41,7 @@ public class MealServlet extends HttpServlet {
         }
 
         MealsUtil.addToMeals(new Meal(LocalDateTime.now(), description, calories));
+
         List<MealWithExceed> meals = getMealWithExceeds();
         forwardToMeals(request, response, meals);
     }
