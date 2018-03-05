@@ -28,15 +28,12 @@ public class MealsUtil {
 
     private static final int CALORIES_PER_DAY = 2000;
 
-    public static List<MealWithExceed> getWithExceeded() {
-        Collection<List<Meal>> list = meals.stream()
-                .collect(Collectors.groupingBy(Meal::getDate)).values();
+    public static int getCaloriesPerDay() {
+        return CALORIES_PER_DAY;
+    }
 
-        return list.stream().flatMap(dayMeals -> {
-            boolean exceed = dayMeals.stream().mapToInt(Meal::getCalories).sum() > CALORIES_PER_DAY;
-            return dayMeals.stream()
-                    .map(meal -> createWithExceed(meal, exceed));
-        }).collect(toList());
+    public static List<Meal> getMeals() {
+        return meals;
     }
 
     public static void main(String[] args) {
