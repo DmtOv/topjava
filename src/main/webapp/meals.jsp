@@ -15,7 +15,8 @@
     </tr>
     <c:forEach var="meal" items="${meals}">
         <tr bgcolor="${meal.isExceed() ? 'red' : 'green'}">
-            <td><c:out value="${meal.getDateTime()}"/></td>
+            <td><c:out value="${meal.getDateTime().toLocalDate().toString()}"/>
+                <c:out value="${meal.getDateTime().toLocalTime().toString()}"/></td>
             <td><c:out value="${meal.getDescription()}"/></td>
             <td><c:out value="${meal.getCalories()}"/></td>
         </tr>

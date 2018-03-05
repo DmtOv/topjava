@@ -18,8 +18,8 @@ public class MealWithExceed {
         this.exceed = exceed;
     }
 
-    public String getDateTime() {
-        return dateTime.toLocalDate().toString() + " " + dateTime.toLocalTime();
+    public LocalDateTime getDateTime() {
+        return dateTime;
     }
 
     public String getDescription() {
