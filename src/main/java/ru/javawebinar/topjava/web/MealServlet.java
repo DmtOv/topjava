@@ -1,6 +1,7 @@
 package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
+import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.MealWithExceed;
 import ru.javawebinar.topjava.util.MealsUtil;
 
@@ -9,6 +10,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -28,5 +31,31 @@ public class MealServlet extends HttpServlet {
 
         request.setAttribute("meals", meals);
         request.getRequestDispatcher("/meals.jsp").forward(request, response);
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        log.debug("add meal");
+
+        String description = request.getParameter("description");
+        int calories;
+        final String CALORIES = "calories";
+
+        try {
+            calories = Integer.valueOf(request.getParameter(CALORIES));
+        }catch (NumberFormatException e){
+            log.debug("Parametr " + CALORIES + " is not number");
+            return;
+        }
+
+        LocalDateTime time = LocalDateTime.now();
+        Meal meal = new Meal(time,description,calories);
+
+        List<Meal> list = MealsUtil.getMeals();
+        list.add(meal);
+
+
+        request.getRequestDispatcher("/meals.jsp").forward(request, response);
+
     }
 }

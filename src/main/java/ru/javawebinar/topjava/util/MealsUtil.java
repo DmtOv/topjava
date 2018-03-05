@@ -17,7 +17,7 @@ import static java.util.stream.Collectors.toList;
 
 public class MealsUtil {
 
-    private final static List<Meal> meals = Arrays.asList(
+    public final static List<Meal> meals = Arrays.asList(
             new Meal(LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Завтрак", 500),
             new Meal(LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "Обед", 1000),
             new Meal(LocalDateTime.of(2015, Month.MAY, 30, 20, 0), "Ужин", 500),

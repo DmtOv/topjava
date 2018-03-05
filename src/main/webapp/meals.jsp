@@ -22,5 +22,7 @@
         </tr>
     </c:forEach>
 </table>
+
+<a href="add.jsp">add</a>
 </body>
 </html>
