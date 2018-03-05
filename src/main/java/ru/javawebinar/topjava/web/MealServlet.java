@@ -10,7 +10,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -23,39 +22,38 @@ public class MealServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.debug("forward to meals");
-
-        List<MealWithExceed> meals = MealsUtil.getFilteredWithExceededInOnePass(MealsUtil.getMeals(),
-                LocalTime.MIN,
-                LocalTime.MAX,
-                MealsUtil.getCaloriesPerDay());
-
-        request.setAttribute("meals", meals);
-        request.getRequestDispatcher("/meals.jsp").forward(request, response);
+        List<MealWithExceed> meals = getMealWithExceeds();
+        forwardToMeals(request, response, meals);
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.debug("add meal");
-
         String description = request.getParameter("description");
-        int calories;
         final String CALORIES = "calories";
+        int calories;
 
         try {
             calories = Integer.valueOf(request.getParameter(CALORIES));
-        }catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             log.debug("Parametr " + CALORIES + " is not number");
             return;
         }
 
-        LocalDateTime time = LocalDateTime.now();
-        Meal meal = new Meal(time,description,calories);
+        MealsUtil.addToMeals(new Meal(LocalDateTime.now(), description, calories));
+        List<MealWithExceed> meals = getMealWithExceeds();
+        forwardToMeals(request, response, meals);
+    }
 
-        List<Meal> list = MealsUtil.getMeals();
-        list.add(meal);
-
-
+    private void forwardToMeals(HttpServletRequest request, HttpServletResponse response, List<MealWithExceed> meals) throws ServletException, IOException {
+        request.setAttribute("meals", meals);
         request.getRequestDispatcher("/meals.jsp").forward(request, response);
+    }
 
+    private List<MealWithExceed> getMealWithExceeds() {
+        return MealsUtil.getFilteredWithExceededInOnePass(MealsUtil.getMeals(),
+                LocalTime.MIN,
+                LocalTime.MAX,
+                MealsUtil.getCaloriesPerDay());
     }
 }
