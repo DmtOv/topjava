@@ -15,10 +15,15 @@
     </tr>
     <c:forEach var="meal" items="${meals}">
         <tr bgcolor="${meal.isExceed() ? 'red' : 'green'}">
+
+            <td><c:out value="${meal.getId()}"/></td>
             <td><c:out value="${meal.getDateTime().toLocalDate().toString()}"/>
                 <c:out value="${meal.getDateTime().toLocalTime().toString()}"/></td>
             <td><c:out value="${meal.getDescription()}"/></td>
             <td><c:out value="${meal.getCalories()}"/></td>
+            <td><a href="meals?action=edit&id=<c:out value="${meal.getId()}"/>">Update</a></td>
+            <td><a href="meals?action=delete&id=<c:out value="${meal.getId()}"/>">Delete</a></td>
+
         </tr>
     </c:forEach>
 </table>
