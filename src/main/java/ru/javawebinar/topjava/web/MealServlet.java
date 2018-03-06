@@ -3,7 +3,7 @@ package ru.javawebinar.topjava.web;
 import org.slf4j.Logger;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.MealWithExceed;
-import ru.javawebinar.topjava.util.MealsUtil;
+import ru.javawebinar.topjava.store.Store;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -15,15 +15,20 @@ import java.time.LocalTime;
 import java.util.List;
 
 import static org.slf4j.LoggerFactory.getLogger;
+import static ru.javawebinar.topjava.util.MealsUtil.getFilteredWithExceededInOnePass;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = getLogger(MealServlet.class);
+    private static final int CALORIES_PER_DAY = 2000;
+
+    private final Store store = new Store();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.debug("forward to meals");
         List<MealWithExceed> meals = getMealWithExceeds();
-        forwardToMeals(request, response, meals);
+        request.setAttribute("meals", meals);
+        request.getRequestDispatcher("/meals.jsp").forward(request, response);
     }
 
     @Override
@@ -40,21 +45,14 @@ public class MealServlet extends HttpServlet {
             return;
         }
 
-        MealsUtil.addToMeals(new Meal(LocalDateTime.now(), description, calories));
+        store.save(new Meal(LocalDateTime.now(), description, calories));
 
-        List<MealWithExceed> meals = getMealWithExceeds();
-        forwardToMeals(request, response, meals);
-    }
-
-    private void forwardToMeals(HttpServletRequest request, HttpServletResponse response, List<MealWithExceed> meals) throws ServletException, IOException {
-        request.setAttribute("meals", meals);
+        List<MealWithExceed> mealWithExceeds = getMealWithExceeds();
+        request.setAttribute("meals", mealWithExceeds);
         request.getRequestDispatcher("/meals.jsp").forward(request, response);
     }
 
     private List<MealWithExceed> getMealWithExceeds() {
-        return MealsUtil.getFilteredWithExceededInOnePass(MealsUtil.getMeals(),
-                LocalTime.MIN,
-                LocalTime.MAX,
-                MealsUtil.getCaloriesPerDay());
+        return getFilteredWithExceededInOnePass(store.findAll(), LocalTime.MIN, LocalTime.MAX, CALORIES_PER_DAY);
     }
 }

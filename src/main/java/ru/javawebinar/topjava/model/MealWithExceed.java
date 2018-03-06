@@ -3,6 +3,7 @@ package ru.javawebinar.topjava.model;
 import java.time.LocalDateTime;
 
 public class MealWithExceed {
+
     private final LocalDateTime dateTime;
 
     private final String description;
