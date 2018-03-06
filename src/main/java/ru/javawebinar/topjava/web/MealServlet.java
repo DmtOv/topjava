@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 
 import static org.slf4j.LoggerFactory.getLogger;
 import static ru.javawebinar.topjava.util.MealsUtil.getFilteredWithExceededInOnePass;
@@ -27,44 +28,45 @@ public class MealServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.debug("do get");
 
-        if (request.getParameter("action") != null) {
-
+        if (Objects.nonNull(request.getParameter("action"))) { // update
             if (request.getParameter("action").equals("edit")) {
-
-                /// for to add with param
-            }
-
-            if (request.getParameter("action").equals("delete")) {
+                int id = Integer.valueOf(request.getParameter("id"));
+                Meal meal = store.findById(id);
+                request.setAttribute("meal", meal);
+                request.getRequestDispatcher("/add.jsp").forward(request, response);
+            } else if (request.getParameter("action").equals("delete")) {  // delete
                 int id = Integer.valueOf(request.getParameter("id"));
                 store.delete(store.findById(id));
-                List<MealWithExceed> meals = getMealWithExceeds();
-                request.setAttribute("meals", meals);
-                request.getRequestDispatcher("/meals.jsp").forward(request, response);
+                fwdToListMeals(request, response);
             }
         } else {
-
-            List<MealWithExceed> meals = getMealWithExceeds();
-            request.setAttribute("meals", meals);
-            request.getRequestDispatcher("/meals.jsp").forward(request, response);
+            fwdToListMeals(request, response);
         }
     }
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.debug("add meal");
-        String description = request.getParameter("description");
-        final String CALORIES = "calories";
-        int calories;
 
-        try {
-            calories = Integer.valueOf(request.getParameter(CALORIES));
-        } catch (NumberFormatException e) {
-            log.debug("Parametr " + CALORIES + " is not number");
-            return;
+        if (Objects.nonNull(request.getParameter("id"))) { // update
+            String description = request.getParameter("description");
+            int calories = Integer.valueOf(request.getParameter("calories"));
+            int id = Integer.valueOf(request.getParameter("id"));
+
+            Meal meal = store.findById(id);
+            meal.setDescription(description);
+            meal.setCalories(calories);
+            store.update(meal);
+            fwdToListMeals(request, response);
+        } else {  // add
+            String description = request.getParameter("description");
+            int calories = Integer.valueOf(request.getParameter("calories"));
+            store.save(new Meal(LocalDateTime.now(), description, calories));
+            fwdToListMeals(request, response);
         }
+    }
 
-        store.save(new Meal(LocalDateTime.now(), description, calories));
-
+    private void fwdToListMeals(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         List<MealWithExceed> mealWithExceeds = getMealWithExceeds();
         request.setAttribute("meals", mealWithExceeds);
         request.getRequestDispatcher("/meals.jsp").forward(request, response);

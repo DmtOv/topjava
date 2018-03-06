@@ -5,14 +5,20 @@
 </head>
 <body>
 <h2> Create meal</h2>
+
 <form action="meals" method="post">
-    Description: <input type="text" name="description">
+
+    <input type="hidden" name="id" value="${meal.getId()}">
+
+    Description: <input type="text" name="description" value="${meal.getDescription()}">
     <br>
     <br>
-    Calories: <input type="text" name="calories">
+
+    Calories: <input type="text" name="calories" value="${meal.getCalories()}">
     <br>
     <br>
     <input type="submit">
+
 </form>
 </body>
 </html>

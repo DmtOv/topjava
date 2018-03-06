@@ -43,7 +43,9 @@ public class Store implements Crud {
 
     @Override
     public void update(Meal meal) {
-
+        Meal res = meals.stream().filter(m -> (m.getId() == meal.getId())).findFirst().get();
+        res.setDescription(meal.getDescription());
+        res.setCalories(meal.getCalories());
     }
 
     @Override
