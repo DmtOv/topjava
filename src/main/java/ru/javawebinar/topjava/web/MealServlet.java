@@ -36,7 +36,7 @@ public class MealServlet extends HttpServlet {
 
             if (request.getParameter("action").equals("delete")) {
                 int id = Integer.valueOf(request.getParameter("id"));
-                store.delete(store.findById(id).get());
+                store.delete(store.findById(id));
                 List<MealWithExceed> meals = getMealWithExceeds();
                 request.setAttribute("meals", meals);
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
