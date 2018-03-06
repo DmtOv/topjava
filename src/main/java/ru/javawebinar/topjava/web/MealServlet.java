@@ -27,8 +27,10 @@ public class MealServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.debug("do get");
+        request.setCharacterEncoding("UTF-8");
 
-        if (Objects.nonNull(request.getParameter("action"))) { // update
+        if (request.getParameter("action") != null
+                && (!request.getParameter("action").equals(""))) { // update
             if (request.getParameter("action").equals("edit")) {
                 int id = Integer.valueOf(request.getParameter("id"));
                 Meal meal = store.findById(id);
@@ -44,11 +46,19 @@ public class MealServlet extends HttpServlet {
         }
     }
 
+    private void fwdToListMeals(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        List<MealWithExceed> mealWithExceeds = getMealWithExceeds();
+        request.setAttribute("meals", mealWithExceeds);
+        request.getRequestDispatcher("/meals.jsp").forward(request, response);
+    }
+
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         log.debug("add meal");
+        request.setCharacterEncoding("UTF-8");
 
-        if (Objects.nonNull(request.getParameter("id"))) { // update
+        if (request.getParameter("id") != null
+                && (!request.getParameter("id").equals(""))) { // update
             String description = request.getParameter("description");
             int calories = Integer.valueOf(request.getParameter("calories"));
             int id = Integer.valueOf(request.getParameter("id"));
@@ -64,12 +74,6 @@ public class MealServlet extends HttpServlet {
             store.save(new Meal(LocalDateTime.now(), description, calories));
             fwdToListMeals(request, response);
         }
-    }
-
-    private void fwdToListMeals(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        List<MealWithExceed> mealWithExceeds = getMealWithExceeds();
-        request.setAttribute("meals", mealWithExceeds);
-        request.getRequestDispatcher("/meals.jsp").forward(request, response);
     }
 
     private List<MealWithExceed> getMealWithExceeds() {
