@@ -25,7 +25,6 @@ public class Store implements Crud {
         ));
     }
 
-
     @Override
     public List<Meal> findAll() {
         return meals;
@@ -39,7 +38,7 @@ public class Store implements Crud {
 
     @Override
     public Meal findById(int id) {
-        return meals.get(id);
+        return meals.stream().filter(meal -> (meal.getId() == id)).findFirst().get();
     }
 
     @Override
@@ -49,6 +48,6 @@ public class Store implements Crud {
 
     @Override
     public void delete(Meal meal) {
-
+        meals.remove(meal);
     }
 }

@@ -41,8 +41,6 @@ public class MealServlet extends HttpServlet {
                 request.setAttribute("meals", meals);
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
             }
-
-
         } else {
 
             List<MealWithExceed> meals = getMealWithExceeds();
