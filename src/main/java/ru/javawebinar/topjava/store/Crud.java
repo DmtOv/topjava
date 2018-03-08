@@ -8,7 +8,7 @@ public interface Crud  {
 
     List<Meal> findAll();
 
-    void save(Meal meal);
+    Meal save(Meal meal);
 
     Meal findById(int id);
 

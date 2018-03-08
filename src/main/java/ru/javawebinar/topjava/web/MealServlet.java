@@ -3,7 +3,7 @@ package ru.javawebinar.topjava.web;
 import org.slf4j.Logger;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.MealWithExceed;
-import ru.javawebinar.topjava.store.Store;
+import ru.javawebinar.topjava.store.MemoryCrud;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -21,7 +21,12 @@ public class MealServlet extends HttpServlet {
     private static final Logger log = getLogger(MealServlet.class);
     private static final int CALORIES_PER_DAY = 2000;
 
-    private final Store store = new Store();
+    private MemoryCrud memoryCrud;
+
+    @Override
+    public void init() {
+        memoryCrud = new MemoryCrud();
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -32,12 +37,13 @@ public class MealServlet extends HttpServlet {
                 && (!request.getParameter("action").equals(""))) { // update
             if (request.getParameter("action").equals("edit")) {
                 int id = Integer.valueOf(request.getParameter("id"));
-                Meal meal = store.findById(id);
+                Meal meal = memoryCrud.findById(id);
                 request.setAttribute("meal", meal);
                 request.getRequestDispatcher("/add.jsp").forward(request, response);
             } else if (request.getParameter("action").equals("delete")) {  // delete
                 int id = Integer.valueOf(request.getParameter("id"));
-                store.delete(store.findById(id));
+                Meal m = memoryCrud.findById(id);
+                memoryCrud.delete(m);
                 fwdToListMeals(request, response);
             }
         } else {
@@ -62,20 +68,20 @@ public class MealServlet extends HttpServlet {
             int calories = Integer.valueOf(request.getParameter("calories"));
             int id = Integer.valueOf(request.getParameter("id"));
 
-            Meal meal = store.findById(id);
+            Meal meal = memoryCrud.findById(id);
             meal.setDescription(description);
             meal.setCalories(calories);
-            store.update(meal);
+            memoryCrud.update(meal);
             fwdToListMeals(request, response);
         } else {  // add
             String description = request.getParameter("description");
             int calories = Integer.valueOf(request.getParameter("calories"));
-            store.save(new Meal(LocalDateTime.now(), description, calories));
+            memoryCrud.save(new Meal(LocalDateTime.now(), description, calories));
             fwdToListMeals(request, response);
         }
     }
 
     private List<MealWithExceed> getMealWithExceeds() {
-        return getFilteredWithExceededInOnePass(store.findAll(), LocalTime.MIN, LocalTime.MAX, CALORIES_PER_DAY);
+        return getFilteredWithExceededInOnePass(memoryCrud.findAll(), LocalTime.MIN, LocalTime.MAX, CALORIES_PER_DAY);
     }
 }
