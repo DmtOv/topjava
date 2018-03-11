@@ -2,14 +2,22 @@ package ru.javawebinar.topjava.repository;
 
 import ru.javawebinar.topjava.model.Meal;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Collection;
 
 public interface MealRepository {
-    Meal save(Meal meal);
 
-    void delete(int id);
+    // null if not found
+    Meal save(Meal meal, Integer userId);
 
-    Meal get(int id);
+    void delete(int id, Integer userId);
 
-    Collection<Meal> getAll();
+    // null if not found
+    Meal get(int id, Integer userId);
+
+    // List.Empty if not found
+    Collection<Meal> getAll(Integer userId);
+
+    Collection<Meal> getAll(Integer userId, LocalDate dBegin, LocalDate dEnd, LocalTime tBegin, LocalTime tEnd);
 }

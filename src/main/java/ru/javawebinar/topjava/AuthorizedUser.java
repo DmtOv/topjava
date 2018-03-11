@@ -11,4 +11,5 @@ public class AuthorizedUser {
     public static int getCaloriesPerDay() {
         return DEFAULT_CALORIES_PER_DAY;
     }
+
 }
