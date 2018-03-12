@@ -2,6 +2,7 @@ package ru.javawebinar.topjava;
 
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.mock.InMemoryMealRepositoryImpl;
@@ -25,7 +26,8 @@ public class SpringMain {
             appCtx.getBean(MealRestController.class);
             System.out.println("We have all Meal classes in context");
             //2.3: Проверьте сценарий: авторизованный пользователь пробует изменить чужую еду (id еды ему не принадлежит).
-            if ( null == repo.save(repo.get(1, 0), 1)){
+            Meal meal = repo.get(1, 0);
+            if ( null == repo.save(meal, 1)){
                 System.out.println("Success. User can't save other meal");
             }
         }

@@ -7,7 +7,6 @@ import ru.javawebinar.topjava.util.DateTimeUtil;
 import ru.javawebinar.topjava.util.MealsUtil;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -21,9 +20,11 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     private AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.MEALS.forEach(m -> save(m, 0));
-        MealsUtil.MEALS.forEach(m -> save(m, 1));
-        MealsUtil.MEALS.forEach(m -> save(m, 2));
+        int userId=0;
+        for ( Meal m : MealsUtil.MEALS)
+        {
+            save(m, ++userId);
+        }
     }
 
     @Override

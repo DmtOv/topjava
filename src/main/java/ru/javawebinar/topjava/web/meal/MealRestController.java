@@ -47,4 +47,8 @@ public class MealRestController {
     public Meal update(Meal meal) {
         return save(meal);
     }
+
+    public boolean delete(int id){
+        return service.delete(id, AuthorizedUser.id());
+    }
 }
