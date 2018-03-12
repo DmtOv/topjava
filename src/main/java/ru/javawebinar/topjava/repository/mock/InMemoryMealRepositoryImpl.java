@@ -22,6 +22,8 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
 
     {
         MealsUtil.MEALS.forEach(m -> save(m, 0));
+        MealsUtil.MEALS.forEach(m -> save(m, 1));
+        MealsUtil.MEALS.forEach(m -> save(m, 2));
     }
 
     @Override
@@ -38,10 +40,13 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     }
 
     @Override
-    public void delete(int id, Integer userId) {
+    public boolean delete(int id, Integer userId) {
         Meal meal = repository.get(id);
         if (Objects.nonNull(meal) && meal.getUserId().equals(userId)) {
             repository.remove(id);
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -55,15 +60,14 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     public Collection<Meal> getAll(Integer userId) {
         return repository.values().stream()
                 .filter(m -> (m.getUserId().equals(userId)))
-                .sorted()
+                .sorted((m1, m2) -> (m1.getTime().compareTo(m2.getTime())))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public Collection<Meal> getAll(Integer userId, LocalDate dBegin, LocalDate dEnd, LocalTime tBegin, LocalTime tEnd) {
+    public Collection<Meal> getAll(Integer userId, LocalDate dBegin, LocalDate dEnd) {
         return getAll(userId).stream()
                 .filter(m -> DateTimeUtil.isBetween(m.getDate(), dBegin, dEnd))
-                .filter(m -> DateTimeUtil.isBetween(m.getTime(), tBegin, tEnd))
                 .collect(Collectors.toList());
     }
 }

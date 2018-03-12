@@ -6,7 +6,7 @@ import java.util.Set;
 
 import static ru.javawebinar.topjava.util.MealsUtil.DEFAULT_CALORIES_PER_DAY;
 
-public class User extends AbstractNamedEntity implements Comparable<User>{
+public class User extends AbstractNamedEntity {
 
     private String email;
 
@@ -87,10 +87,5 @@ public class User extends AbstractNamedEntity implements Comparable<User>{
                 ", roles=" + roles +
                 ", caloriesPerDay=" + caloriesPerDay +
                 ')';
-    }
-
-    @Override
-    public int compareTo(User o) {
-        return this.name.compareTo(o.getName());
     }
 }

@@ -22,7 +22,7 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
     private AtomicInteger counter = new AtomicInteger(0);
 
     {
-        Stream.of(
+        Arrays.asList(
                 new User(null, "userName1", "email1", "password1", Role.ROLE_ADMIN),
                 new User(null, "userName2", "email2", "password2", Role.ROLE_USER),
                 new User(null, "userName3", "email3", "password3", Role.ROLE_USER),
@@ -52,13 +52,15 @@ public class InMemoryUserRepositoryImpl implements UserRepository {
     @Override
     public User get(int id) {
         log.info("get {}", id);
-        return Optional.ofNullable(repository.get(id)).orElse(null);
+        return repository.get(id);
     }
 
     @Override
     public List<User> getAll() {
         log.info("getAll");
-        return repository.values().stream().sorted().collect(Collectors.toList());
+        return repository.values().stream()
+                .sorted((u1, u2) -> (u1.getName().compareTo(u2.getName())))
+                .collect(Collectors.toList());
     }
 
     @Override

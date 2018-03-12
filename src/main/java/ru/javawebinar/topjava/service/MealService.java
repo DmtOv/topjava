@@ -1,6 +1,7 @@
 package ru.javawebinar.topjava.service;
 
 import ru.javawebinar.topjava.model.Meal;
+import ru.javawebinar.topjava.to.MealWithExceed;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -10,10 +11,10 @@ public interface MealService {
 
     Meal save(Meal meal, int userId);
 
-    void delete(int id, int userId);
+    boolean delete(int id, int userId);
 
     Meal get(int id, int userId);
 
-    Collection<Meal> getAll(int userId, LocalDate dBegin, LocalDate dEnd, LocalTime tBegin, LocalTime tEnd);
-
+    Collection<MealWithExceed> getAll(int userId, LocalDate dBegin, LocalDate dEnd,
+                                      LocalTime tBegin, LocalTime tEnd, int  caloriaLimit);
 }
