@@ -13,20 +13,30 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = LoggerFactory.getLogger(MealServlet.class);
 
     private MealRestController controller;
+    private ConfigurableApplicationContext appCtx;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        ConfigurableApplicationContext appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml");
+        appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml");
         controller = appCtx.getBean(MealRestController.class);
+    }
+
+    @Override
+    public void destroy() {
+        appCtx.close();
+        super.destroy();
     }
 
     @Override
@@ -70,9 +80,19 @@ public class MealServlet extends HttpServlet {
                 break;
             case "all":
             default:
-                log.info("getAll");
-                request.setAttribute("meals",
-                        controller.getAll());
+                if (Stream.of(request.getParameter("startDate"), request.getParameter("startTime"),
+                        request.getParameter("endDate"), request.getParameter("endTime")).anyMatch(Objects::nonNull)) {
+                    log.info("getAllFiltered");
+                    request.setAttribute("meals",
+                            controller.getAllFiltered(
+                                    request.getParameter("startDate").isEmpty() ? null : LocalDate.parse(request.getParameter("startDate")),
+                                    request.getParameter("endDate").isEmpty() ? null : LocalDate.parse(request.getParameter("endDate")),
+                                    request.getParameter("startTime").isEmpty() ? null : LocalTime.parse(request.getParameter("startTime")),
+                                    request.getParameter("endTime").isEmpty() ? null : LocalTime.parse(request.getParameter("endTime"))));
+                } else {
+                    log.info("getAll");
+                    request.setAttribute("meals", controller.getAll());
+                }
                 request.getRequestDispatcher("/meals.jsp").forward(request, response);
                 break;
         }

@@ -54,7 +54,9 @@ public class MealServiceImpl implements MealService {
         checkNotFound(meals.size() > 0 , "meals for userId=" + userId);
         return MealsUtil.getWithExceeded(
                 meals.stream()
-                        .filter(m -> DateTimeUtil.isBetween(m.getTime(), tBegin, tEnd))
+                        .filter(m -> DateTimeUtil.isBetween(m.getTime(),
+                                (tBegin == null) ? LocalTime.MIN : tBegin ,
+                                (tEnd == null) ? LocalTime.MAX : tEnd ))
                         .collect(Collectors.toList()),
                 caloriaLimit);
     }
