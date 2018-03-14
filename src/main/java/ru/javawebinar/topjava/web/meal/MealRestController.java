@@ -12,6 +12,9 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFound;
+import static ru.javawebinar.topjava.util.ValidationUtil.checkNotFoundWithId;
+
 @Controller
 public class MealRestController {
 
@@ -37,7 +40,7 @@ public class MealRestController {
     }
 
     public Meal get(int id) {
-        return service.get(id, AuthorizedUser.id());
+        return checkNotFoundWithId(service.get(id, AuthorizedUser.id()), id);
     }
 
     public Meal save(Meal meal) {
@@ -45,10 +48,10 @@ public class MealRestController {
     }
 
     public Meal update(Meal meal) {
-        return save(meal);
+        return checkNotFound(save(meal), "Can't update meal with id=" + meal.getId());
     }
 
-    public boolean delete(int id){
-        return service.delete(id, AuthorizedUser.id());
+    public Boolean delete(int id) {
+        return checkNotFoundWithId(service.delete(id, AuthorizedUser.id()), id);
     }
 }

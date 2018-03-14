@@ -1,5 +1,6 @@
 package ru.javawebinar.topjava.service;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.to.MealWithExceed;
 
@@ -11,7 +12,7 @@ public interface MealService {
 
     Meal save(Meal meal, int userId);
 
-    boolean delete(int id, int userId);
+    Boolean delete(int id, int userId);
 
     Meal get(int id, int userId);
 

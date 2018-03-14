@@ -35,7 +35,7 @@ public class MealServiceImpl implements MealService {
     }
 
     @Override
-    public boolean delete(int id, int userId) {
+    public Boolean delete(int id, int userId) {
         return repository.delete(id, userId);
     }
 
@@ -51,12 +51,11 @@ public class MealServiceImpl implements MealService {
                                              int caloriaLimit) {
 
         List<Meal> meals = new ArrayList<>(repository.getAll(userId, dBegin, dEnd));
-        checkNotFound(meals.size() > 0 , "meals for userId=" + userId);
-        return MealsUtil.getWithExceeded(
+        return meals.isEmpty() ? new ArrayList<MealWithExceed>() : MealsUtil.getWithExceeded(
                 meals.stream()
                         .filter(m -> DateTimeUtil.isBetween(m.getTime(),
-                                (tBegin == null) ? LocalTime.MIN : tBegin ,
-                                (tEnd == null) ? LocalTime.MAX : tEnd ))
+                                (tBegin == null) ? LocalTime.MIN : tBegin,
+                                (tEnd == null) ? LocalTime.MAX : tEnd))
                         .collect(Collectors.toList()),
                 caloriaLimit);
     }
