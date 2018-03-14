@@ -20,9 +20,8 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
     private AtomicInteger counter = new AtomicInteger(0);
 
     {
-        int userId=0;
-        for ( Meal m : MealsUtil.MEALS)
-        {
+        int userId = 0;
+        for (Meal m : MealsUtil.MEALS) {
             save(m, ++userId);
         }
     }
@@ -36,7 +35,11 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
             return meal;
         } else {
             // treat case: update, but absent in storage
-            return meal.getUserId().equals(userId) ? repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal) : null;
+            Meal mealRepo = repository.get(meal.getId());
+            if (mealRepo == null) {
+                return null;
+            }
+            return mealRepo.getUserId().equals(userId) ? repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal) : null;
         }
     }
 
