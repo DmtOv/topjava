@@ -43,18 +43,11 @@ public class MealServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         request.setCharacterEncoding("UTF-8");
         String id = request.getParameter("id");
-        final Meal meal;
-        if (id.isEmpty()) {
-            meal = new Meal(null,
-                    LocalDateTime.parse(request.getParameter("dateTime")),
-                    request.getParameter("description"),
-                    Integer.parseInt(request.getParameter("calories")));
-        } else {
-            meal = controller.get(Integer.valueOf(id));
-            meal.setDateTime(LocalDateTime.parse(request.getParameter("dateTime")));
-            meal.setDescription(request.getParameter("description"));
-            meal.setCalories(Integer.parseInt(request.getParameter("calories")));
-        }
+        Meal meal = new Meal(null,
+                LocalDateTime.parse(request.getParameter("dateTime")),
+                request.getParameter("description"),
+                Integer.parseInt(request.getParameter("calories")));
+        meal.setId(id.isEmpty() ? null : Integer.valueOf(id));
         log.info(id.isEmpty() ? "Create {}" : "Update {}", controller.save(meal));
         response.sendRedirect("meals");
     }
