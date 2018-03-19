@@ -1,5 +1,8 @@
 package ru.javawebinar.topjava.repository.jdbc;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
@@ -8,7 +11,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public class JdbcMealRepositoryImpl implements MealRepository {
+    public class JdbcMealRepositoryImpl implements MealRepository {
+
+    private static final BeanPropertyRowMapper<Meal> MEAL_ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
+
+    private final JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    public JdbcMealRepositoryImpl(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
 
     @Override
     public Meal save(Meal meal, int userId) {
@@ -27,7 +40,7 @@ public class JdbcMealRepositoryImpl implements MealRepository {
 
     @Override
     public List<Meal> getAll(int userId) {
-        return null;
+        return jdbcTemplate.query("SELECT * FROM meals ORDER BY date_time", MEAL_ROW_MAPPER);
     }
 
     @Override
