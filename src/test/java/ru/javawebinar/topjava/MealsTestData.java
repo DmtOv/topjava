@@ -4,6 +4,9 @@ import ru.javawebinar.topjava.model.Meal;
 
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.Arrays;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class MealsTestData {
 
@@ -18,5 +21,13 @@ public class MealsTestData {
 
     public static final Meal mealAdmin = new Meal(ADMIN_MEAL_ID,
             LocalDateTime.of(2015, Month.JUNE, 1, 21, 0), "admin meal", 1500);
+
+    public static void assertMatch(Iterable<Meal> actual, Meal... expected) {
+        assertMatch(actual, Arrays.asList(expected));
+    }
+
+    public static void assertMatch(Iterable<Meal> actual, Iterable<Meal> expected) {
+        assertThat(actual).isEqualTo(expected);
+    }
 
 }

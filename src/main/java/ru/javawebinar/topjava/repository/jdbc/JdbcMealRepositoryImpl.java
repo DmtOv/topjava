@@ -10,10 +10,12 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.util.DateTimeUtil;
 
 import javax.sql.DataSource;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Repository
 public class JdbcMealRepositoryImpl implements MealRepository {
@@ -41,16 +43,17 @@ public class JdbcMealRepositoryImpl implements MealRepository {
 
         MapSqlParameterSource map = new MapSqlParameterSource()
                 .addValue("id", meal.getId())
-                .addValue("dateTime", meal.getDateTime())
+                .addValue("date_time", meal.getDateTime())
                 .addValue("description", meal.getDescription())
-                .addValue("calories", meal.getCalories());
+                .addValue("calories", meal.getCalories())
+                .addValue("user_id", userId);
 
         if (meal.isNew()) {
             Number newKey = insertMeal.executeAndReturnKey(map);
             meal.setId(newKey.intValue());
         } else if (namedParameterJdbcTemplate.update(
-                "UPDATE users SET name=:name, email=:email, password=:password, " +
-                        "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", map) == 0) {
+                "UPDATE meals SET dateTime=:dateTime, description=:description, calories=:calories, " +
+                        " WHERE id=:id", map) == 0) {
             return null;
         }
         return meal;
@@ -58,7 +61,7 @@ public class JdbcMealRepositoryImpl implements MealRepository {
 
     @Override
     public boolean delete(int id, int userId) {
-        int res = jdbcTemplate.update("DELETE FROM meals WHERE (id = ?) AND (userId = ?)", id, userId);
+        int res = jdbcTemplate.update("DELETE FROM meals WHERE ((id = ?) AND (user_id = ?))", id, userId);
         return res != 0;
     }
 
@@ -76,6 +79,8 @@ public class JdbcMealRepositoryImpl implements MealRepository {
 
     @Override
     public List<Meal> getBetween(LocalDateTime startDate, LocalDateTime endDate, int userId) {
-        return null;
+        return getAll(userId).stream()
+                .filter(m -> (DateTimeUtil.isBetween(m.getDateTime(), startDate, endDate)))
+                .collect(Collectors.toList());
     }
 }
