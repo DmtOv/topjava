@@ -4,6 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -18,6 +19,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(SpringRunner.class)
 public class JdbcMealRepositoryImplTest {
 
+    static {
+        // Only for postgres driver logging
+        // It uses java.util.logging and logged via jul-to-slf4j bridge
+        SLF4JBridgeHandler.install();
+    }
+    
     @Autowired
     JdbcMealRepositoryImpl repository;
 
@@ -39,6 +46,10 @@ public class JdbcMealRepositoryImplTest {
 
     @Test
     public void get() {
+        Meal meal = repository.get(MealsTestData.USER_MEAL_ID, MealsTestData.USER_ID);
+        assertThat(meal).isEqualTo(MealsTestData.mealUser);
+        System.out.println(meal);
+        System.out.println(MealsTestData.mealUser);
     }
 
     @Test
