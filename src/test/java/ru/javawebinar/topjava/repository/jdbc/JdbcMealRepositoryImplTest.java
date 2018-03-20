@@ -1,7 +1,5 @@
 package ru.javawebinar.topjava.repository.jdbc;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.bridge.SLF4JBridgeHandler;
