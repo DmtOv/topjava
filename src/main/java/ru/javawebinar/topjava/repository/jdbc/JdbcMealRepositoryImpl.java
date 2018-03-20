@@ -40,7 +40,7 @@ import java.util.List;
 
     @Override
     public List<Meal> getAll(int userId) {
-        return jdbcTemplate.query("SELECT * FROM meals ORDER BY date_time", MEAL_ROW_MAPPER);
+        return jdbcTemplate.query("SELECT * FROM meals WHERE (user_id = ?) ORDER BY date_time", MEAL_ROW_MAPPER, userId);
     }
 
     @Override

@@ -7,9 +7,12 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import ru.javawebinar.topjava.MealsTestData;
 import ru.javawebinar.topjava.model.Meal;
 
 import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ContextConfiguration({"classpath:spring/spring-app.xml", "classpath:spring/spring-db.xml"})
 @RunWith(SpringRunner.class)
@@ -20,7 +23,6 @@ public class JdbcMealRepositoryImplTest {
 
     @Before
     public void setUp() throws Exception {
-
     }
 
     @After
@@ -41,7 +43,8 @@ public class JdbcMealRepositoryImplTest {
 
     @Test
     public void getAll() {
-        repository.getAll(1);
+        List<Meal> meals = repository.getAll(100000);
+        assertThat(meals.stream().findFirst().orElse(null)).isEqualTo(MealsTestData.mealUser);
     }
 
     @Test
