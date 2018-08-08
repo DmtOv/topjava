@@ -1,0 +1,75 @@
+Index: src/main/java/ru/javawebinar/topjava/repository/datajpa/CrudUserRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/repository/datajpa/CrudUserRepository.java	(date 1523125516000)
++++ src/main/java/ru/javawebinar/topjava/repository/datajpa/CrudUserRepository.java	(date 1523125535294)
+@@ -1,6 +1,7 @@
+ package ru.javawebinar.topjava.repository.datajpa;
+ 
+ import org.springframework.data.domain.Sort;
++import org.springframework.data.jpa.repository.EntityGraph;
+ import org.springframework.data.jpa.repository.JpaRepository;
+ import org.springframework.data.jpa.repository.Modifying;
+ import org.springframework.data.jpa.repository.Query;
+@@ -15,7 +16,6 @@
+ public interface CrudUserRepository extends JpaRepository<User, Integer> {
+     @Transactional
+     @Modifying
+-//    @Query(name = User.DELETE)
+     @Query("DELETE FROM User u WHERE u.id=:id")
+     int delete(@Param("id") int id);
+ 
+@@ -31,6 +31,10 @@
+ 
+     User getByEmail(String email);
+ 
+-    @Query("SELECT u FROM User u LEFT JOIN FETCH u.meals WHERE u.id = ?1")
++//    @Query("SELECT u FROM User u LEFT JOIN FETCH u.meals WHERE u.id = ?1")
++//    @EntityGraph(value = User.GRAPH_WITH_MEALS)
++
++    @EntityGraph(attributePaths={"meals", "roles"})
++    @Query("SELECT u FROM User u WHERE u.id=?1")
+     User getWithMeals(int id);
+ }
+Index: src/main/java/ru/javawebinar/topjava/model/User.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/model/User.java	(date 1523125516000)
++++ src/main/java/ru/javawebinar/topjava/model/User.java	(date 1523125535279)
+@@ -1,5 +1,6 @@
+ package ru.javawebinar.topjava.model;
+ 
++import org.hibernate.annotations.BatchSize;
+ import org.hibernate.validator.constraints.Range;
+ import org.springframework.util.CollectionUtils;
+ 
+@@ -15,12 +16,15 @@
+ @NamedQueries({
+         @NamedQuery(name = User.DELETE, query = "DELETE FROM User u WHERE u.id=:id"),
+         @NamedQuery(name = User.BY_EMAIL, query = "SELECT u FROM User u LEFT JOIN FETCH u.roles WHERE u.email=?1"),
+-        @NamedQuery(name = User.ALL_SORTED, query = "SELECT u FROM User u LEFT JOIN FETCH u.roles ORDER BY u.name, u.email"),
++        @NamedQuery(name = User.ALL_SORTED, query = "SELECT u FROM User u ORDER BY u.name, u.email"),
+ })
+ @Entity
++//@NamedEntityGraph(name = User.GRAPH_WITH_MEALS, attributeNodes = {@NamedAttributeNode("meals")})
+ @Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = "email", name = "users_unique_email_idx")})
+ public class User extends AbstractNamedEntity {
+ 
++//    public static final String GRAPH_WITH_MEALS = "User.withMeals";
++
+     public static final String DELETE = "User.delete";
+     public static final String BY_EMAIL = "User.getByEmail";
+     public static final String ALL_SORTED = "User.getAllSorted";
+@@ -47,6 +51,8 @@
+     @CollectionTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+     @Column(name = "role")
+     @ElementCollection(fetch = FetchType.EAGER)
++//    @Fetch(FetchMode.SUBSELECT)
++    @BatchSize(size = 200)
+     private Set<Role> roles;
+ 
+     @Column(name = "calories_per_day", columnDefinition = "int default 2000")

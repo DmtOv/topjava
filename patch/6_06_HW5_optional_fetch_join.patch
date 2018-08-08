@@ -1,0 +1,319 @@
+Index: src/main/java/ru/javawebinar/topjava/repository/UserRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/repository/UserRepository.java	(date 1523124786000)
++++ src/main/java/ru/javawebinar/topjava/repository/UserRepository.java	(date 1523124793857)
+@@ -17,4 +17,8 @@
+     User getByEmail(String email);
+ 
+     List<User> getAll();
++
++    default User getWithMeals(int id){
++        throw new UnsupportedOperationException();
++    }
+ }
+\ No newline at end of file
+Index: src/test/java/ru/javawebinar/topjava/service/AbstractUserServiceTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/AbstractUserServiceTest.java	(date 1523124786000)
++++ src/test/java/ru/javawebinar/topjava/service/AbstractUserServiceTest.java	(date 1523124793929)
+@@ -18,7 +18,7 @@
+ public abstract class AbstractUserServiceTest extends AbstractServiceTest {
+ 
+     @Autowired
+-    private UserService service;
++    protected UserService service;
+ 
+     @Autowired
+     private CacheManager cacheManager;
+Index: src/test/java/ru/javawebinar/topjava/service/AbstractMealServiceTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/AbstractMealServiceTest.java	(date 1523124786000)
++++ src/test/java/ru/javawebinar/topjava/service/AbstractMealServiceTest.java	(date 1523124793920)
+@@ -15,7 +15,7 @@
+ public abstract class AbstractMealServiceTest extends AbstractServiceTest {
+ 
+     @Autowired
+-    private MealService service;
++    protected MealService service;
+ 
+     @Test
+     public void delete() throws Exception {
+Index: src/main/java/ru/javawebinar/topjava/repository/datajpa/CrudMealRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/repository/datajpa/CrudMealRepository.java	(date 1523124786000)
++++ src/main/java/ru/javawebinar/topjava/repository/datajpa/CrudMealRepository.java	(date 1523124793813)
+@@ -28,4 +28,7 @@
+     @SuppressWarnings("JpaQlInspection")
+     @Query("SELECT m from Meal m WHERE m.user.id=:userId AND m.dateTime BETWEEN :startDate AND :endDate ORDER BY m.dateTime DESC")
+     List<Meal> getBetween(@Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate, @Param("userId") int userId);
++
++    @Query("SELECT m FROM Meal m JOIN FETCH m.user WHERE m.id = ?1 and m.user.id = ?2")
++    Meal getWithUser(int id, int userId);
+ }
+\ No newline at end of file
+Index: src/main/java/ru/javawebinar/topjava/repository/datajpa/DataJpaUserRepositoryImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/repository/datajpa/DataJpaUserRepositoryImpl.java	(date 1523124786000)
++++ src/main/java/ru/javawebinar/topjava/repository/datajpa/DataJpaUserRepositoryImpl.java	(date 1523124793839)
+@@ -39,4 +39,9 @@
+     public List<User> getAll() {
+         return crudRepository.findAll(SORT_NAME_EMAIL);
+     }
++
++    @Override
++    public User getWithMeals(int id) {
++        return crudRepository.getWithMeals(id);
++    }
+ }
+Index: src/main/java/ru/javawebinar/topjava/repository/datajpa/DataJpaMealRepositoryImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/repository/datajpa/DataJpaMealRepositoryImpl.java	(date 1523124786000)
++++ src/main/java/ru/javawebinar/topjava/repository/datajpa/DataJpaMealRepositoryImpl.java	(date 1523124793828)
+@@ -47,4 +47,9 @@
+     public List<Meal> getBetween(LocalDateTime startDate, LocalDateTime endDate, int userId) {
+         return crudMealRepository.getBetween(startDate, endDate, userId);
+     }
++
++    @Override
++    public Meal getWithUser(int id, int userId) {
++        return crudMealRepository.getWithUser(id, userId);
++    }
+ }
+Index: src/main/java/ru/javawebinar/topjava/repository/datajpa/CrudUserRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/repository/datajpa/CrudUserRepository.java	(date 1523124786000)
++++ src/main/java/ru/javawebinar/topjava/repository/datajpa/CrudUserRepository.java	(date 1523124793818)
+@@ -30,4 +30,7 @@
+     List<User> findAll(Sort sort);
+ 
+     User getByEmail(String email);
++
++    @Query("SELECT u FROM User u LEFT JOIN FETCH u.meals WHERE u.id = ?1")
++    User getWithMeals(int id);
+ }
+Index: src/main/java/ru/javawebinar/topjava/service/UserServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/service/UserServiceImpl.java	(date 1523124786000)
++++ src/main/java/ru/javawebinar/topjava/service/UserServiceImpl.java	(date 1523124793892)
+@@ -60,4 +60,9 @@
+         Assert.notNull(user, "user must not be null");
+         checkNotFoundWithId(repository.save(user), user.getId());
+     }
++
++    @Override
++    public User getWithMeals(int id) {
++        return checkNotFoundWithId(repository.getWithMeals(id), id);
++    }
+ }
+\ No newline at end of file
+Index: src/main/java/ru/javawebinar/topjava/service/MealServiceImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/service/MealServiceImpl.java	(date 1523124786000)
++++ src/main/java/ru/javawebinar/topjava/service/MealServiceImpl.java	(date 1523124793875)
+@@ -53,4 +53,9 @@
+         Assert.notNull(meal, "meal must not be null");
+         return repository.save(meal, userId);
+     }
++
++    @Override
++    public Meal getWithUser(int id, int userId) {
++        return checkNotFoundWithId(repository.getWithUser(id, userId), id);
++    }
+ }
+\ No newline at end of file
+Index: src/test/java/ru/javawebinar/topjava/service/datajpa/DataJpaUserServiceTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/datajpa/DataJpaUserServiceTest.java	(date 1523124786000)
++++ src/test/java/ru/javawebinar/topjava/service/datajpa/DataJpaUserServiceTest.java	(date 1523124793910)
+@@ -1,10 +1,26 @@
+ package ru.javawebinar.topjava.service.datajpa;
+ 
++import org.junit.Test;
+ import org.springframework.test.context.ActiveProfiles;
++import ru.javawebinar.topjava.MealTestData;
++import ru.javawebinar.topjava.model.User;
+ import ru.javawebinar.topjava.service.AbstractUserServiceTest;
++import ru.javawebinar.topjava.util.exception.NotFoundException;
+ 
+ import static ru.javawebinar.topjava.Profiles.DATAJPA;
++import static ru.javawebinar.topjava.UserTestData.*;
+ 
+ @ActiveProfiles(DATAJPA)
+ public class DataJpaUserServiceTest extends AbstractUserServiceTest {
++    @Test
++    public void testGetWithMeals() throws Exception {
++        User user = service.getWithMeals(USER_ID);
++        assertMatch(user, USER);
++        MealTestData.assertMatch(user.getMeals(), MealTestData.MEALS);
++    }
++
++    @Test(expected = NotFoundException.class)
++    public void testGetWithMealsNotFound() throws Exception {
++        service.getWithMeals(1);
++    }
+ }
+\ No newline at end of file
+Index: src/main/java/ru/javawebinar/topjava/service/UserService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/service/UserService.java	(date 1523124786000)
++++ src/main/java/ru/javawebinar/topjava/service/UserService.java	(date 1523124793885)
+@@ -19,4 +19,6 @@
+     void update(User user);
+ 
+     List<User> getAll();
++
++    User getWithMeals(int id);
+ }
+\ No newline at end of file
+Index: src/test/java/ru/javawebinar/topjava/service/datajpa/DataJpaMealServiceTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/datajpa/DataJpaMealServiceTest.java	(date 1523124786000)
++++ src/test/java/ru/javawebinar/topjava/service/datajpa/DataJpaMealServiceTest.java	(date 1523124793902)
+@@ -1,10 +1,27 @@
+ package ru.javawebinar.topjava.service.datajpa;
+ 
++import org.junit.Test;
+ import org.springframework.test.context.ActiveProfiles;
++import ru.javawebinar.topjava.UserTestData;
++import ru.javawebinar.topjava.model.Meal;
+ import ru.javawebinar.topjava.service.AbstractMealServiceTest;
++import ru.javawebinar.topjava.util.exception.NotFoundException;
+ 
++import static ru.javawebinar.topjava.MealTestData.*;
+ import static ru.javawebinar.topjava.Profiles.DATAJPA;
++import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
+ 
+ @ActiveProfiles(DATAJPA)
+ public class DataJpaMealServiceTest extends AbstractMealServiceTest {
++    @Test
++    public void testGetWithUser() throws Exception {
++        Meal adminMeal = service.getWithUser(ADMIN_MEAL_ID, ADMIN_ID);
++        assertMatch(adminMeal, ADMIN_MEAL1);
++        UserTestData.assertMatch(adminMeal.getUser(), UserTestData.ADMIN);
++    }
++
++    @Test(expected = NotFoundException.class)
++    public void testGetWithUserNotFound() throws Exception {
++        service.getWithUser(MEAL1_ID, ADMIN_ID);
++    }
+ }
+Index: src/main/java/ru/javawebinar/topjava/service/MealService.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/service/MealService.java	(date 1523124786000)
++++ src/main/java/ru/javawebinar/topjava/service/MealService.java	(date 1523124793866)
+@@ -24,4 +24,6 @@
+     Meal update(Meal meal, int userId) throws NotFoundException;
+ 
+     Meal create(Meal meal, int userId);
++
++    Meal getWithUser(int id, int userId);
+ }
+\ No newline at end of file
+Index: src/test/java/ru/javawebinar/topjava/UserTestData.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/UserTestData.java	(date 1523124786000)
++++ src/test/java/ru/javawebinar/topjava/UserTestData.java	(date 1523124793937)
+@@ -16,7 +16,7 @@
+     public static final User ADMIN = new User(ADMIN_ID, "Admin", "admin@gmail.com", "admin", Role.ROLE_ADMIN);
+ 
+     public static void assertMatch(User actual, User expected) {
+-        assertThat(actual).isEqualToIgnoringGivenFields(expected, "registered", "roles");
++        assertThat(actual).isEqualToIgnoringGivenFields(expected, "registered", "roles", "meals");
+     }
+ 
+     public static void assertMatch(Iterable<User> actual, User... expected) {
+@@ -24,6 +24,6 @@
+     }
+ 
+     public static void assertMatch(Iterable<User> actual, Iterable<User> expected) {
+-        assertThat(actual).usingElementComparatorIgnoringFields("registered", "roles").isEqualTo(expected);
++        assertThat(actual).usingElementComparatorIgnoringFields("registered", "roles", "meals").isEqualTo(expected);
+     }
+ }
+Index: src/main/java/ru/javawebinar/topjava/repository/MealRepository.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/repository/MealRepository.java	(date 1523124786000)
++++ src/main/java/ru/javawebinar/topjava/repository/MealRepository.java	(date 1523124793848)
+@@ -20,4 +20,8 @@
+ 
+     // ORDERED dateTime desc
+     List<Meal> getBetween(LocalDateTime startDate, LocalDateTime endDate, int userId);
++
++    default Meal getWithUser(int id, int userId) {
++        throw new UnsupportedOperationException();
++    }
+ }
+Index: src/main/java/ru/javawebinar/topjava/model/User.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/model/User.java	(date 1523124786000)
++++ src/main/java/ru/javawebinar/topjava/model/User.java	(date 1523124793803)
+@@ -53,6 +53,10 @@
+     @Range(min = 10, max = 10000)
+     private int caloriesPerDay = DEFAULT_CALORIES_PER_DAY;
+ 
++    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
++    @OrderBy("dateTime DESC")
++    protected List<Meal> meals;
++
+     public User() {
+     }
+ 
+@@ -122,6 +126,10 @@
+         this.roles = CollectionUtils.isEmpty(roles) ? Collections.emptySet() : EnumSet.copyOf(roles);
+     }
+ 
++    public List<Meal> getMeals() {
++        return meals;
++    }
++
+     @Override
+     public String toString() {
+         return "User{" +

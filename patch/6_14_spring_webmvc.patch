@@ -1,0 +1,211 @@
+Index: src/main/resources/spring/spring-mvc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/resources/spring/spring-mvc.xml	(date 1523304303643)
++++ src/main/resources/spring/spring-mvc.xml	(date 1523304303643)
+@@ -0,0 +1,18 @@
++<beans xmlns="http://www.springframework.org/schema/beans"
++       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
++       xmlns:context="http://www.springframework.org/schema/context"
++       xmlns:p="http://www.springframework.org/schema/p" xmlns:mvc="http://www.springframework.org/schema/mvc"
++       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
++       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
++
++    <mvc:annotation-driven/>
++
++    <context:component-scan base-package="ru.javawebinar.**.web"/>
++
++    <!--  all resources inside folder src/main/webapp/resources are mapped so they can be referred to inside JSP files -->
++    <mvc:resources mapping="/resources/**" location="/resources/"/>
++
++    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
++          p:prefix="/WEB-INF/jsp/"
++          p:suffix=".jsp"/>
++</beans>
+\ No newline at end of file
+Index: src/main/java/ru/javawebinar/topjava/web/RootController.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/web/RootController.java	(date 1523304303625)
++++ src/main/java/ru/javawebinar/topjava/web/RootController.java	(date 1523304303625)
+@@ -0,0 +1,35 @@
++package ru.javawebinar.topjava.web;
++
++import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.stereotype.Controller;
++import org.springframework.ui.Model;
++import org.springframework.web.bind.annotation.GetMapping;
++import org.springframework.web.bind.annotation.PostMapping;
++import ru.javawebinar.topjava.AuthorizedUser;
++import ru.javawebinar.topjava.service.UserService;
++
++import javax.servlet.http.HttpServletRequest;
++
++@Controller
++public class RootController {
++    @Autowired
++    private UserService service;
++
++    @GetMapping("/")
++    public String root() {
++        return "index";
++    }
++
++    @GetMapping("/users")
++    public String users(Model model) {
++        model.addAttribute("users", service.getAll());
++        return "users";
++    }
++
++    @PostMapping("/users")
++    public String setUser(HttpServletRequest request) {
++        int userId = Integer.valueOf(request.getParameter("userId"));
++        AuthorizedUser.setId(userId);
++        return "redirect:meals";
++    }
++}
+Index: src/main/resources/spring/spring-app.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/resources/spring/spring-app.xml	(date 1523304272000)
++++ src/main/resources/spring/spring-app.xml	(date 1523304303633)
+@@ -17,7 +17,4 @@
+     <!--<context:annotation-config/>-->
+ 
+     <context:component-scan base-package="ru.javawebinar.**.service"/>
+-
+-    <context:component-scan base-package="ru.javawebinar.**.web"/>
+-
+ </beans>
+\ No newline at end of file
+Index: src/main/webapp/css/style.css
+===================================================================
+--- src/main/webapp/css/style.css	(date 1523304272000)
++++ src/main/webapp/resources/css/style.css	(date 1523302829201)
+@@ -1,0 +1,0 @@
+Index: src/main/webapp/users.jsp
+===================================================================
+--- src/main/webapp/users.jsp	(date 1523304272000)
++++ src/main/webapp/WEB-INF/jsp/users.jsp	(date 1523303105264)
+@@ -1,0 +1,0 @@
+Index: src/main/webapp/index.jsp
+===================================================================
+--- src/main/webapp/index.jsp	(date 1523304272000)
++++ src/main/webapp/WEB-INF/jsp/index.jsp	(date 1523299230320)
+@@ -1,0 +1,0 @@
+Index: src/main/webapp/WEB-INF/web.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/WEB-INF/web.xml	(date 1523304272000)
++++ src/main/webapp/WEB-INF/web.xml	(date 1523304303959)
+@@ -19,9 +19,25 @@
+         </param-value>
+     </context-param>
+ 
++    <!-- Spring MVC -->
+     <listener>
+         <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+     </listener>
++    <servlet>
++        <servlet-name>mvc-dispatcher</servlet-name>
++        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
++        <init-param>
++            <param-name>contextConfigLocation</param-name>
++            <param-value>classpath:spring/spring-mvc.xml</param-value>
++        </init-param>
++        <load-on-startup>1</load-on-startup>
++    </servlet>
++    <servlet-mapping>
++        <servlet-name>mvc-dispatcher</servlet-name>
++        <url-pattern>/</url-pattern>
++    </servlet-mapping>
++
++<!--
+     <servlet>
+         <servlet-name>userServlet</servlet-name>
+         <servlet-class>ru.javawebinar.topjava.web.UserServlet</servlet-class>
+@@ -41,5 +57,6 @@
+         <servlet-name>mealServlet</servlet-name>
+         <url-pattern>/meals</url-pattern>
+     </servlet-mapping>
++-->
+ 
+ </web-app>
+Index: src/main/resources/logback.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/resources/logback.xml	(date 1523304272000)
++++ src/main/resources/logback.xml	(date 1523304303643)
+@@ -21,6 +21,7 @@
+     </appender>
+ 
+     <logger name="ru.javawebinar.topjava" level="debug"/>
++    <logger name="org.springframework.web.servlet" level="debug"/>
+ 
+     <root level="info">
+         <appender-ref ref="file"/>
+Index: src/main/webapp/fragments/headTag.jsp
+===================================================================
+--- src/main/webapp/fragments/headTag.jsp	(date 1523304272000)
++++ src/main/webapp/WEB-INF/jsp/fragments/headTag.jsp	(date 1523304303786)
+@@ -6,5 +6,5 @@
+ <head>
+     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+     <title><fmt:message key="app.title"/></title>
+-    <link rel="stylesheet" href="css/style.css">
++    <link rel="stylesheet" href="resources/css/style.css">
+ </head>
+\ No newline at end of file
+Index: src/main/webapp/meals.jsp
+===================================================================
+--- src/main/webapp/meals.jsp	(date 1523304272000)
++++ src/main/webapp/WEB-INF/jsp/meals.jsp	(date 1523303839224)
+@@ -1,0 +1,0 @@
+Index: pom.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- pom.xml	(date 1523304272000)
++++ pom.xml	(date 1523304303969)
+@@ -213,7 +213,7 @@
+ 
+         <dependency>
+             <groupId>org.springframework</groupId>
+-            <artifactId>spring-web</artifactId>
++            <artifactId>spring-webmvc</artifactId>
+         </dependency>
+ 
+         <!--Test-->
+Index: src/main/webapp/fragments/footer.jsp
+===================================================================
+--- src/main/webapp/fragments/footer.jsp	(date 1523304272000)
++++ src/main/webapp/WEB-INF/jsp/fragments/footer.jsp	(date 1523299230289)
+@@ -1,0 +1,0 @@
+Index: src/main/webapp/mealForm.jsp
+===================================================================
+--- src/main/webapp/mealForm.jsp	(date 1523304272000)
++++ src/main/webapp/WEB-INF/jsp/mealForm.jsp	(date 1523119718047)
+@@ -1,0 +1,0 @@
+Index: src/main/webapp/fragments/bodyHeader.jsp
+===================================================================
+--- src/main/webapp/fragments/bodyHeader.jsp	(date 1523304272000)
++++ src/main/webapp/WEB-INF/jsp/fragments/bodyHeader.jsp	(date 1523304818932)
+@@ -2,4 +2,4 @@
+ <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+ 
+ <fmt:setBundle basename="messages.app"/>
+-<header><a href="index.jsp"><fmt:message key="app.home"/></a>&nbsp;|&nbsp;<a href="meals"><fmt:message key="app.title"/></a></header>
+\ No newline at end of file
++<header><a href="${pageContext.request.contextPath}/"><fmt:message key="app.home"/></a>&nbsp;|&nbsp;<a href="meals"><fmt:message key="app.title"/></a></header>
+\ No newline at end of file

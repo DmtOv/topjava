@@ -1,0 +1,163 @@
+Index: src/main/java/ru/javawebinar/topjava/repository/jdbc/JdbcMealRepositoryImpl.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/repository/jdbc/JdbcMealRepositoryImpl.java	(date 1523124415000)
++++ src/main/java/ru/javawebinar/topjava/repository/jdbc/JdbcMealRepositoryImpl.java	(date 1523124441999)
+@@ -1,6 +1,7 @@
+ package ru.javawebinar.topjava.repository.jdbc;
+ 
+ import org.springframework.beans.factory.annotation.Autowired;
++import org.springframework.context.annotation.Profile;
+ import org.springframework.dao.support.DataAccessUtils;
+ import org.springframework.jdbc.core.BeanPropertyRowMapper;
+ import org.springframework.jdbc.core.JdbcTemplate;
+@@ -9,32 +10,53 @@
+ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+ import org.springframework.stereotype.Repository;
++import ru.javawebinar.topjava.Profiles;
+ import ru.javawebinar.topjava.model.Meal;
+ import ru.javawebinar.topjava.repository.MealRepository;
+ 
+ import javax.sql.DataSource;
++import java.sql.Timestamp;
+ import java.time.LocalDateTime;
+ import java.util.List;
+ 
+ @Repository
+-public class JdbcMealRepositoryImpl implements MealRepository {
++public abstract class JdbcMealRepositoryImpl<T> implements MealRepository {
+ 
+     private static final RowMapper<Meal> ROW_MAPPER = BeanPropertyRowMapper.newInstance(Meal.class);
+ 
+-    private final JdbcTemplate jdbcTemplate;
+-
+-    private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+-
+-    private final SimpleJdbcInsert insertMeal;
++    @Autowired
++    private JdbcTemplate jdbcTemplate;
+ 
+     @Autowired
+-    public JdbcMealRepositoryImpl(DataSource dataSource, JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
++    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
++
++    private SimpleJdbcInsert insertMeal;
++
++    protected abstract T toDbDateTime(LocalDateTime ldt);
++
++    @Autowired
++    private void setDataSource(DataSource dataSource) {
+         this.insertMeal = new SimpleJdbcInsert(dataSource)
+                 .withTableName("meals")
+                 .usingGeneratedKeyColumns("id");
++    }
+ 
+-        this.jdbcTemplate = jdbcTemplate;
+-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
++    @Repository
++    @Profile(Profiles.POSTGRES_DB)
++    public static class Java8JdbcMealRepositoryImpl extends JdbcMealRepositoryImpl<LocalDateTime> {
++        @Override
++        protected LocalDateTime toDbDateTime(LocalDateTime ldt) {
++            return ldt;
++        }
++    }
++
++    @Repository
++    @Profile(Profiles.HSQL_DB)
++    public static class TimestampJdbcMealRepositoryImpl extends JdbcMealRepositoryImpl<Timestamp> {
++        @Override
++        protected Timestamp toDbDateTime(LocalDateTime ldt) {
++            return Timestamp.valueOf(ldt);
++        }
+     }
+ 
+     @Override
+@@ -43,7 +65,7 @@
+                 .addValue("id", meal.getId())
+                 .addValue("description", meal.getDescription())
+                 .addValue("calories", meal.getCalories())
+-                .addValue("date_time", meal.getDateTime())
++                .addValue("date_time", toDbDateTime(meal.getDateTime()))
+                 .addValue("user_id", userId);
+ 
+         if (meal.isNew()) {
+@@ -83,6 +105,6 @@
+     public List<Meal> getBetween(LocalDateTime startDate, LocalDateTime endDate, int userId) {
+         return jdbcTemplate.query(
+                 "SELECT * FROM meals WHERE user_id=?  AND date_time BETWEEN  ? AND ? ORDER BY date_time DESC",
+-                ROW_MAPPER, userId, startDate, endDate);
++                ROW_MAPPER, userId, toDbDateTime(startDate), toDbDateTime(endDate));
+     }
+ }
+Index: src/main/java/ru/javawebinar/topjava/web/MealServlet.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/java/ru/javawebinar/topjava/web/MealServlet.java	(date 1523124415000)
++++ src/main/java/ru/javawebinar/topjava/web/MealServlet.java	(date 1523124442020)
+@@ -1,7 +1,7 @@
+ package ru.javawebinar.topjava.web;
+ 
+-import org.springframework.context.ConfigurableApplicationContext;
+ import org.springframework.context.support.ClassPathXmlApplicationContext;
++import ru.javawebinar.topjava.Profiles;
+ import ru.javawebinar.topjava.model.Meal;
+ import ru.javawebinar.topjava.web.meal.MealRestController;
+ 
+@@ -22,13 +22,16 @@
+ 
+ public class MealServlet extends HttpServlet {
+ 
+-    private ConfigurableApplicationContext springContext;
++    private ClassPathXmlApplicationContext springContext;
+     private MealRestController mealController;
+ 
+     @Override
+     public void init(ServletConfig config) throws ServletException {
+         super.init(config);
+-        springContext = new ClassPathXmlApplicationContext("spring/spring-app.xml", "spring/spring-db.xml");
++        springContext = new ClassPathXmlApplicationContext(new String[]{"spring/spring-app.xml", "spring/spring-db.xml"}, false);
++//       springContext.setConfigLocations("spring/spring-app.xml", "spring/spring-db.xml");
++        springContext.getEnvironment().setActiveProfiles(Profiles.getActiveDbProfile(), Profiles.REPOSITORY_IMPLEMENTATION);
++        springContext.refresh();
+         mealController = springContext.getBean(MealRestController.class);
+     }
+ 
+Index: src/test/java/ru/javawebinar/topjava/SpringMain.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/SpringMain.java	(date 1523124415000)
++++ src/test/java/ru/javawebinar/topjava/SpringMain.java	(date 1523124442031)
+@@ -1,7 +1,6 @@
+ package ru.javawebinar.topjava;
+ 
+-import org.springframework.context.ConfigurableApplicationContext;
+-import org.springframework.context.support.ClassPathXmlApplicationContext;
++import org.springframework.context.support.GenericXmlApplicationContext;
+ import ru.javawebinar.topjava.model.Role;
+ import ru.javawebinar.topjava.model.User;
+ import ru.javawebinar.topjava.to.MealWithExceed;
+@@ -17,10 +16,14 @@
+ public class SpringMain {
+     public static void main(String[] args) {
+         // java 7 Automatic resource management
+-        try (ConfigurableApplicationContext appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml","spring/mock.xml")) {
++        try (GenericXmlApplicationContext appCtx = new GenericXmlApplicationContext()) {
++            appCtx.getEnvironment().setActiveProfiles(Profiles.getActiveDbProfile(), Profiles.REPOSITORY_IMPLEMENTATION);
++            appCtx.load("spring/spring-app.xml", "spring/spring-db.xml");
++            appCtx.refresh();
++
+             System.out.println("Bean definition names: " + Arrays.toString(appCtx.getBeanDefinitionNames()));
+             AdminRestController adminUserController = appCtx.getBean(AdminRestController.class);
+-            adminUserController.create(new User(null, "userName", "email", "password", Role.ROLE_ADMIN));
++            adminUserController.create(new User(null, "userName", "email@mail.ru", "password", Role.ROLE_ADMIN));
+             System.out.println();
+ 
+             MealRestController mealController = appCtx.getBean(MealRestController.class);

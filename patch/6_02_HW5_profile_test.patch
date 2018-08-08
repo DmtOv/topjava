@@ -1,0 +1,419 @@
+Index: src/test/java/ru/javawebinar/topjava/service/datajpa/DataJpaUserServiceTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/datajpa/DataJpaUserServiceTest.java	(date 1523123817222)
++++ src/test/java/ru/javawebinar/topjava/service/datajpa/DataJpaUserServiceTest.java	(date 1523123817222)
+@@ -0,0 +1,10 @@
++package ru.javawebinar.topjava.service.datajpa;
++
++import org.springframework.test.context.ActiveProfiles;
++import ru.javawebinar.topjava.service.AbstractUserServiceTest;
++
++import static ru.javawebinar.topjava.Profiles.DATAJPA;
++
++@ActiveProfiles(DATAJPA)
++public class DataJpaUserServiceTest extends AbstractUserServiceTest {
++}
+\ No newline at end of file
+Index: src/test/java/ru/javawebinar/topjava/service/datajpa/DataJpaMealServiceTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/datajpa/DataJpaMealServiceTest.java	(date 1523123817215)
++++ src/test/java/ru/javawebinar/topjava/service/datajpa/DataJpaMealServiceTest.java	(date 1523123817215)
+@@ -0,0 +1,10 @@
++package ru.javawebinar.topjava.service.datajpa;
++
++import org.springframework.test.context.ActiveProfiles;
++import ru.javawebinar.topjava.service.AbstractMealServiceTest;
++
++import static ru.javawebinar.topjava.Profiles.DATAJPA;
++
++@ActiveProfiles(DATAJPA)
++public class DataJpaMealServiceTest extends AbstractMealServiceTest {
++}
+Index: src/test/java/ru/javawebinar/topjava/service/jpa/JpaMealServiceTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/jpa/JpaMealServiceTest.java	(date 1523123817241)
++++ src/test/java/ru/javawebinar/topjava/service/jpa/JpaMealServiceTest.java	(date 1523123817241)
+@@ -0,0 +1,10 @@
++package ru.javawebinar.topjava.service.jpa;
++
++import org.springframework.test.context.ActiveProfiles;
++import ru.javawebinar.topjava.service.AbstractMealServiceTest;
++
++import static ru.javawebinar.topjava.Profiles.JPA;
++
++@ActiveProfiles(JPA)
++public class JpaMealServiceTest extends AbstractMealServiceTest {
++}
+\ No newline at end of file
+Index: src/test/java/ru/javawebinar/topjava/service/jdbc/JdbcUserServiceTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/jdbc/JdbcUserServiceTest.java	(date 1523123817235)
++++ src/test/java/ru/javawebinar/topjava/service/jdbc/JdbcUserServiceTest.java	(date 1523123817235)
+@@ -0,0 +1,10 @@
++package ru.javawebinar.topjava.service.jdbc;
++
++import org.springframework.test.context.ActiveProfiles;
++import ru.javawebinar.topjava.service.AbstractUserServiceTest;
++
++import static ru.javawebinar.topjava.Profiles.JDBC;
++
++@ActiveProfiles(JDBC)
++public class JdbcUserServiceTest extends AbstractUserServiceTest {
++}
+\ No newline at end of file
+Index: src/test/java/ru/javawebinar/topjava/service/jdbc/JdbcMealServiceTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/jdbc/JdbcMealServiceTest.java	(date 1523123817229)
++++ src/test/java/ru/javawebinar/topjava/service/jdbc/JdbcMealServiceTest.java	(date 1523123817229)
+@@ -0,0 +1,10 @@
++package ru.javawebinar.topjava.service.jdbc;
++
++import org.springframework.test.context.ActiveProfiles;
++import ru.javawebinar.topjava.service.AbstractMealServiceTest;
++
++import static ru.javawebinar.topjava.Profiles.JDBC;
++
++@ActiveProfiles(JDBC)
++public class JdbcMealServiceTest extends AbstractMealServiceTest {
++}
+\ No newline at end of file
+Index: src/test/java/ru/javawebinar/topjava/service/AbstractServiceTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/AbstractServiceTest.java	(date 1523123817272)
++++ src/test/java/ru/javawebinar/topjava/service/AbstractServiceTest.java	(date 1523123817272)
+@@ -0,0 +1,61 @@
++package ru.javawebinar.topjava.service;
++
++import org.junit.AfterClass;
++import org.junit.Rule;
++import org.junit.rules.ExpectedException;
++import org.junit.rules.Stopwatch;
++import org.junit.runner.Description;
++import org.junit.runner.RunWith;
++import org.slf4j.Logger;
++import org.slf4j.LoggerFactory;
++import org.slf4j.bridge.SLF4JBridgeHandler;
++import org.springframework.test.context.ActiveProfiles;
++import org.springframework.test.context.ContextConfiguration;
++import org.springframework.test.context.jdbc.Sql;
++import org.springframework.test.context.jdbc.SqlConfig;
++import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
++import ru.javawebinar.topjava.ActiveDbProfileResolver;
++
++import java.util.concurrent.TimeUnit;
++
++@ContextConfiguration({
++        "classpath:spring/spring-app.xml",
++        "classpath:spring/spring-db.xml"
++})
++@RunWith(SpringJUnit4ClassRunner.class)
++@ActiveProfiles(resolver = ActiveDbProfileResolver.class)
++@Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
++abstract public class AbstractServiceTest {
++    private static final Logger log = LoggerFactory.getLogger("result");
++
++    private static StringBuilder results = new StringBuilder();
++
++    @Rule
++    public ExpectedException thrown = ExpectedException.none();
++
++    @Rule
++    // http://stackoverflow.com/questions/14892125/what-is-the-best-practice-to-determine-the-execution-time-of-the-bussiness-relev
++    public Stopwatch stopwatch = new Stopwatch() {
++        @Override
++        protected void finished(long nanos, Description description) {
++            String result = String.format("%-95s %7d", description.getDisplayName(), TimeUnit.NANOSECONDS.toMillis(nanos));
++            results.append(result).append('\n');
++            log.info(result + " ms\n");
++        }
++    };
++
++    static {
++        // needed only for java.util.logging (postgres driver)
++        SLF4JBridgeHandler.install();
++    }
++
++    @AfterClass
++    public static void printResult() {
++        log.info("\n-------------------------------------------------------------------------------------------------------" +
++                "\nTest                                                                                       Duration, ms" +
++                "\n-------------------------------------------------------------------------------------------------------\n" +
++                results +
++                "-------------------------------------------------------------------------------------------------------\n");
++        results.setLength(0);
++    }
++}
+\ No newline at end of file
+Index: src/test/java/ru/javawebinar/topjava/service/jpa/JpaUserServiceTest.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/jpa/JpaUserServiceTest.java	(date 1523123817248)
++++ src/test/java/ru/javawebinar/topjava/service/jpa/JpaUserServiceTest.java	(date 1523123817248)
+@@ -0,0 +1,10 @@
++package ru.javawebinar.topjava.service.jpa;
++
++import org.springframework.test.context.ActiveProfiles;
++import ru.javawebinar.topjava.service.AbstractUserServiceTest;
++
++import static ru.javawebinar.topjava.Profiles.JPA;
++
++@ActiveProfiles(JPA)
++public class JpaUserServiceTest extends AbstractUserServiceTest {
++}
+\ No newline at end of file
+Index: src/main/resources/spring/spring-db.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/resources/spring/spring-db.xml	(date 1523123780000)
++++ src/main/resources/spring/spring-db.xml	(date 1523124007709)
+@@ -11,53 +11,12 @@
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+ 
+-    <!--<context:component-scan base-package="ru.javawebinar.**.repository.jpa"/>-->
+-
+-    <context:component-scan base-package="ru.javawebinar.**.repository.datajpa"/>
+-    <jpa:repositories base-package="ru.javawebinar.**.repository.datajpa"/>
+-
+     <jdbc:initialize-database data-source="dataSource" enabled="${database.init}">
+         <jdbc:script location="classpath:db/${jdbc.initLocation}"/>
+         <jdbc:script encoding="utf-8" location="classpath:db/populateDB.sql"/>
+     </jdbc:initialize-database>
+ 
+-    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+-          p:dataSource-ref="dataSource"
+-          p:packagesToScan="ru.javawebinar.**.model">
+-        <!--p:persistenceUnitName="persistenceUnit">-->
+-
+-        <property name="jpaPropertyMap">
+-            <map>
+-                <entry key="#{T(org.hibernate.cfg.AvailableSettings).FORMAT_SQL}" value="${hibernate.format_sql}"/>
+-                <entry key="#{T(org.hibernate.cfg.AvailableSettings).USE_SQL_COMMENTS}" value="${hibernate.use_sql_comments}"/>
+-                <entry key="#{T(org.hibernate.cfg.AvailableSettings).JPA_PROXY_COMPLIANCE}" value="false"/>
+-                <!--<entry key="#{T(org.hibernate.cfg.AvailableSettings).HBM2DDL_AUTO}" value="${hibernate.hbm2ddl.auto}"/>-->
+-            </map>
+-        </property>
+-
+-        <property name="jpaVendorAdapter">
+-            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
+-                  p:showSql="${jpa.showSql}">
+-            </bean>
+-        </property>
+-    </bean>
+-
+-    <tx:annotation-driven/>
+-
+-    <!-- Transaction manager for a single JPA EntityManagerFactory (alternative to JTA) -->
+-    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
+-          p:entityManagerFactory-ref="entityManagerFactory"/>
+-
+-<!--
+-    <context:component-scan base-package="ru.javawebinar.**.repository.jdbc"/>
+-    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+-        <constructor-arg ref="dataSource"/>
+-    </bean>
+-
+-    <bean id="namedJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+-        <constructor-arg ref="dataSource"/>
+-    </bean>
+--->
++    <!-- Choose profile from (hsqldb, postgres) and (jdbc,datajpa,jpa) -->
+ 
+     <beans profile="hsqldb">
+         <context:property-placeholder location="classpath:db/hsqldb.properties" system-properties-mode="OVERRIDE"/>
+@@ -83,9 +42,50 @@
+     </beans>
+ 
+     <beans profile="jdbc">
++        <context:component-scan base-package="ru.javawebinar.**.repository.jdbc"/>
++        <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
++            <constructor-arg ref="dataSource"/>
++        </bean>
++
++        <bean id="namedJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
++            <constructor-arg ref="dataSource"/>
++        </bean>
+     </beans>
++
++    <beans profile="jpa,datajpa">
++        <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
++              p:dataSource-ref="dataSource"
++              p:packagesToScan="ru.javawebinar.**.model">
++            <!--p:persistenceUnitName="persistenceUnit">-->
++
++            <property name="jpaPropertyMap">
++                <map>
++                    <entry key="#{T(org.hibernate.cfg.AvailableSettings).FORMAT_SQL}" value="${hibernate.format_sql}"/>
++                    <entry key="#{T(org.hibernate.cfg.AvailableSettings).USE_SQL_COMMENTS}"
++                           value="${hibernate.use_sql_comments}"/>
++                    <!--<entry key="#{T(org.hibernate.cfg.AvailableSettings).HBM2DDL_AUTO}" value="${hibernate.hbm2ddl.auto}"/>-->
++                </map>
++            </property>
++
++            <property name="jpaVendorAdapter">
++                <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" p:showSql="${jpa.showSql}">
++                </bean>
++            </property>
++        </bean>
++
++        <tx:annotation-driven/>
++
++        <!-- Transaction manager for a single JPA EntityManagerFactory (alternative to JTA) -->
++        <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
++              p:entityManagerFactory-ref="entityManagerFactory"/>
++    </beans>
++
+     <beans profile="jpa">
++        <context:component-scan base-package="ru.javawebinar.**.repository.jpa"/>
+     </beans>
++
+     <beans profile="datajpa">
++        <context:component-scan base-package="ru.javawebinar.**.repository.datajpa"/>
++        <jpa:repositories base-package="ru.javawebinar.**.repository.datajpa"/>
+     </beans>
+ </beans>
+\ No newline at end of file
+Index: src/test/java/ru/javawebinar/topjava/service/UserServiceTest.java
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/UserServiceTest.java	(date 1523123780000)
++++ src/test/java/ru/javawebinar/topjava/service/AbstractUserServiceTest.java	(date 1523123817282)
+@@ -2,17 +2,9 @@
+ 
+ import org.junit.Before;
+ import org.junit.Test;
+-import org.junit.runner.RunWith;
+-import org.slf4j.bridge.SLF4JBridgeHandler;
+ import org.springframework.beans.factory.annotation.Autowired;
+ import org.springframework.cache.CacheManager;
+ import org.springframework.dao.DataAccessException;
+-import org.springframework.test.context.ActiveProfiles;
+-import org.springframework.test.context.ContextConfiguration;
+-import org.springframework.test.context.jdbc.Sql;
+-import org.springframework.test.context.jdbc.SqlConfig;
+-import org.springframework.test.context.junit4.SpringRunner;
+-import ru.javawebinar.topjava.ActiveDbProfileResolver;
+ import ru.javawebinar.topjava.model.Role;
+ import ru.javawebinar.topjava.model.User;
+ import ru.javawebinar.topjava.util.exception.NotFoundException;
+@@ -23,20 +15,7 @@
+ 
+ import static ru.javawebinar.topjava.UserTestData.*;
+ 
+-@ContextConfiguration({
+-        "classpath:spring/spring-app.xml",
+-        "classpath:spring/spring-db.xml"
+-})
+-@RunWith(SpringRunner.class)
+-@Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
+-@ActiveProfiles(resolver = ActiveDbProfileResolver.class)
+-public class UserServiceTest {
+-
+-    static {
+-        // Only for postgres driver logging
+-        // It uses java.util.logging and logged via jul-to-slf4j bridge
+-        SLF4JBridgeHandler.install();
+-    }
++public abstract class AbstractUserServiceTest extends AbstractServiceTest {
+ 
+     @Autowired
+     private UserService service;
+Index: src/test/java/ru/javawebinar/topjava/service/MealServiceTest.java
+===================================================================
+--- src/test/java/ru/javawebinar/topjava/service/MealServiceTest.java	(date 1523123780000)
++++ src/test/java/ru/javawebinar/topjava/service/AbstractMealServiceTest.java	(date 1523123817258)
+@@ -1,72 +1,18 @@
+ package ru.javawebinar.topjava.service;
+ 
+-import org.junit.AfterClass;
+-import org.junit.Rule;
+ import org.junit.Test;
+-import org.junit.rules.ExpectedException;
+-import org.junit.rules.Stopwatch;
+-import org.junit.runner.Description;
+-import org.junit.runner.RunWith;
+-import org.slf4j.Logger;
+-import org.slf4j.bridge.SLF4JBridgeHandler;
+ import org.springframework.beans.factory.annotation.Autowired;
+-import org.springframework.test.context.ActiveProfiles;
+-import org.springframework.test.context.ContextConfiguration;
+-import org.springframework.test.context.jdbc.Sql;
+-import org.springframework.test.context.jdbc.SqlConfig;
+-import org.springframework.test.context.junit4.SpringRunner;
+-import ru.javawebinar.topjava.ActiveDbProfileResolver;
+ import ru.javawebinar.topjava.model.Meal;
+ import ru.javawebinar.topjava.util.exception.NotFoundException;
+ 
+ import java.time.LocalDate;
+ import java.time.Month;
+-import java.util.concurrent.TimeUnit;
+ 
+-import static org.slf4j.LoggerFactory.getLogger;
+ import static ru.javawebinar.topjava.MealTestData.*;
+ import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
+ import static ru.javawebinar.topjava.UserTestData.USER_ID;
+ 
+-@ContextConfiguration({
+-        "classpath:spring/spring-app.xml",
+-        "classpath:spring/spring-db.xml"
+-})
+-@RunWith(SpringRunner.class)
+-@Sql(scripts = "classpath:db/populateDB.sql", config = @SqlConfig(encoding = "UTF-8"))
+-@ActiveProfiles(resolver = ActiveDbProfileResolver.class)
+-public class MealServiceTest {
+-    private static final Logger log = getLogger("result");
+-
+-    private static StringBuilder results = new StringBuilder();
+-
+-    @Rule
+-    public ExpectedException thrown = ExpectedException.none();
+-
+-    @Rule
+-    // http://stackoverflow.com/questions/14892125/what-is-the-best-practice-to-determine-the-execution-time-of-the-bussiness-relev
+-    public Stopwatch stopwatch = new Stopwatch() {
+-        @Override
+-        protected void finished(long nanos, Description description) {
+-            String result = String.format("\n%-25s %7d", description.getMethodName(), TimeUnit.NANOSECONDS.toMillis(nanos));
+-            results.append(result);
+-            log.info(result + " ms\n");
+-        }
+-    };
+-
+-    static {
+-        // needed only for java.util.logging (postgres driver)
+-        SLF4JBridgeHandler.install();
+-    }
+-
+-    @AfterClass
+-    public static void printResult() {
+-        log.info("\n---------------------------------" +
+-                "\nTest                 Duration, ms" +
+-                "\n---------------------------------" +
+-                results +
+-                "\n---------------------------------");
+-    }
++public abstract class AbstractMealServiceTest extends AbstractServiceTest {
+ 
+     @Autowired
+     private MealService service;

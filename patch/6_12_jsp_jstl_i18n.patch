@@ -1,0 +1,250 @@
+Index: src/main/webapp/index.jsp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/index.jsp	(date 1523299230320)
++++ src/main/webapp/index.jsp	(date 1523299230320)
+@@ -0,0 +1,26 @@
++<%@ page contentType="text/html;charset=UTF-8" language="java" %>
++<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
++<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
++
++<fmt:setBundle basename="messages.app"/>
++
++<html>
++<jsp:include page="fragments/headTag.jsp"/>
++<body>
++<jsp:include page="fragments/bodyHeader.jsp"/>
++<section>
++    <form method="post" action="users">
++        <fmt:message key="app.login"/>: <select name="userId">
++    <option value="100000" selected>User</option>
++    <option value="100001">Admin</option>
++</select>
++        <button type="submit"><fmt:message key="common.select"/></button>
++</form>
++<ul>
++    <li><a href="users"><fmt:message key="user.title"/></a></li>
++    <li><a href="meals"><fmt:message key="meal.title"/></a></li>
++</ul>
++</section>
++<jsp:include page="fragments/footer.jsp"/>
++</body>
++</html>
+\ No newline at end of file
+Index: src/main/resources/messages/app_ru.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/resources/messages/app_ru.properties	(date 1523299227039)
++++ src/main/resources/messages/app_ru.properties	(date 1523299227039)
+@@ -0,0 +1,15 @@
++app.title=\u041F\u043E\u0434\u0441\u0447\u0435\u0442 \u043A\u0430\u043B\u043E\u0440\u0438\u0439
++app.home=\u0413\u043B\u0430\u0432\u043D\u0430\u044F
++app.footer=\u041F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u043F\u043E \u043F\u0440\u043E\u0435\u043A\u0442\u0443 <a href="https://github.com/JavaOPs/topjava" target=_blank>Maven/ Spring/ Security/ JPA(Hibernate)/ Jackson/jQuery</a>
++app.login=\u0417\u0430\u0439\u0442\u0438 \u043A\u0430\u043A
++
++user.title=\u041F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0438
++user.name=\u0418\u043C\u044F
++user.email=\u041F\u043E\u0447\u0442\u0430
++user.roles=\u0420\u043E\u043B\u0438
++user.active=\u0410\u043A\u0442\u0438\u0432\u043D\u044B\u0439
++user.registered=\u0417\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u043E\u0432\u0430\u043D
++
++meal.title=\u041C\u043E\u044F \u0435\u0434\u0430
++
++common.select=\u0412\u044B\u0431\u0440\u0430\u0442\u044C
+\ No newline at end of file
+Index: src/main/resources/messages/app.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/resources/messages/app.properties	(date 1523299227032)
++++ src/main/resources/messages/app.properties	(date 1523299227032)
+@@ -0,0 +1,15 @@
++app.title=Calories management
++app.home=Home
++app.footer=Project <a href="https://github.com/JavaOPs/topjava" target=_blank>Maven/ Spring/ Security/ JPA(Hibernate)/ Jackson/jQuery</a> application
++app.login=Login as
++
++user.title=Users
++user.name=Name
++user.email=Email
++user.roles=Roles
++user.active=Active
++user.registered=Registered
++
++meal.title=Meals
++
++common.select=Select
+\ No newline at end of file
+Index: src/main/webapp/fragments/headTag.jsp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/fragments/headTag.jsp	(date 1523299230304)
++++ src/main/webapp/fragments/headTag.jsp	(date 1523299230304)
+@@ -0,0 +1,10 @@
++<%@page contentType="text/html" pageEncoding="UTF-8" %>
++<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
++<%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
++<fmt:setBundle basename="messages.app"/>
++
++<head>
++    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
++    <title><fmt:message key="app.title"/></title>
++    <link rel="stylesheet" href="css/style.css">
++</head>
+\ No newline at end of file
+Index: src/main/webapp/fragments/footer.jsp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/fragments/footer.jsp	(date 1523299230289)
++++ src/main/webapp/fragments/footer.jsp	(date 1523299230289)
+@@ -0,0 +1,5 @@
++<%@page contentType="text/html" pageEncoding="UTF-8" %>
++<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
++<fmt:setBundle basename="messages.app"/>
++<hr>
++<footer><fmt:message key="app.footer"/></footer>
+\ No newline at end of file
+Index: src/main/webapp/fragments/bodyHeader.jsp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/fragments/bodyHeader.jsp	(date 1523299230269)
++++ src/main/webapp/fragments/bodyHeader.jsp	(date 1523299230269)
+@@ -0,0 +1,5 @@
++<%@page contentType="text/html" pageEncoding="UTF-8" %>
++<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
++
++<fmt:setBundle basename="messages.app"/>
++<header><a href="index.jsp"><fmt:message key="app.home"/></a>&nbsp;|&nbsp;<a href="meals"><fmt:message key="app.title"/></a></header>
+\ No newline at end of file
+Index: src/main/webapp/index.html
+===================================================================
+--- src/main/webapp/index.html	(date 1523296697000)
++++ src/main/webapp/index.html	(date 1523296697000)
+@@ -1,18 +0,0 @@
+-<html>
+-<head>
+-    <meta charset="UTF-8">
+-    <title>Java Enterprise (Topjava)</title>
+-</head>
+-<body>
+-<h3>Проект <a href="https://github.com/JavaWebinar/topjava" target="_blank">Java Enterprise (Topjava)</a></h3>
+-<hr>
+-<form method="post" action="users">
+-    <b>Meals of&nbsp;</b>
+-    <select name="userId">
+-        <option value="100000">User</option>
+-        <option value="100001">Admin</option>
+-    </select>
+-    <button type="submit">Select</button>
+-</form>
+-</body>
+-</html>
+Index: src/main/webapp/css/style.css
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/css/style.css	(date 1523296697000)
++++ src/main/webapp/css/style.css	(date 1523302829201)
+@@ -22,3 +22,11 @@
+ tr[data-mealExceed="true"] {
+     color: red;
+ }
++
++header, footer {
++    background: none repeat scroll 0 0 #A6C9E2;
++    color: #2E6E9E;
++    font-size: 20px;
++    padding: 5px 20px;
++    margin: 6px 0;
++}
+\ No newline at end of file
+Index: src/main/webapp/users.jsp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/users.jsp	(date 1523296697000)
++++ src/main/webapp/users.jsp	(date 1523303105264)
+@@ -1,10 +1,40 @@
+ <%@ page contentType="text/html;charset=UTF-8" language="java" %>
++<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
++<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
++
++<fmt:setBundle basename="messages.app"/>
++
+ <html>
+-<head>
+-    <title>Users</title>
+-</head>
++<jsp:include page="fragments/headTag.jsp"/>
+ <body>
+-<h3><a href="index.html">Home</a></h3>
+-<h2>Users</h2>
++<jsp:include page="fragments/bodyHeader.jsp"/>
++
++<section>
++    <h3><fmt:message key="user.title"/></h3>
++
++    <table border="1" cellpadding="8" cellspacing="0">
++        <thead>
++        <tr>
++            <th><fmt:message key="user.name"/></th>
++            <th><fmt:message key="user.email"/></th>
++            <th><fmt:message key="user.roles"/></th>
++            <th><fmt:message key="user.active"/></th>
++            <th><fmt:message key="user.registered"/></th>
++        </tr>
++        </thead>
++        <c:forEach items="${users}" var="user">
++            <jsp:useBean id="user" scope="page" type="ru.javawebinar.topjava.model.User"/>
++            <tr>
++                <td><c:out value="${user.name}"/></td>
++                <td><a href="mailto:${user.email}">${user.email}</a></td>
++                <td>${user.roles}</td>
++                <td><%=user.isEnabled()%>
++                </td>
++                <td><fmt:formatDate value="${user.registered}" pattern="dd-MM-yyyy"/></td>
++            </tr>
++        </c:forEach>
++    </table>
++</section>
++<jsp:include page="fragments/footer.jsp"/>
+ </body>
+ </html>
+\ No newline at end of file
+Index: src/main/webapp/meals.jsp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/meals.jsp	(date 1523296697000)
++++ src/main/webapp/meals.jsp	(date 1523303839224)
+@@ -4,13 +4,12 @@
+ <%@ taglib prefix="fn" uri="http://topjava.javawebinar.ru/functions" %>
+ <html>
+ <head>
+-    <title>Meal list</title>
++    <title>Calories management</title>
+     <link rel="stylesheet" href="css/style.css">
+ </head>
+ <body>
+ <section>
+-    <h3><a href="index.html">Home</a></h3>
+-    <h2>Meals</h2>
++    <h3>Meals</h3>
+     <form method="post" action="meals?action=filter">
+         <dl>
+             <dt>From Date:</dt>

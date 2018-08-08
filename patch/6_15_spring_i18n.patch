@@ -1,0 +1,213 @@
+Index: config/messages/app_ru.properties
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- config/messages/app_ru.properties	(date 1523304989011)
++++ config/messages/app_ru.properties	(date 1523304989011)
+@@ -0,0 +1,15 @@
++app.title=Подсчет калорий
++app.home=Главная
++app.footer=Приложение по проекту <a href="https://github.com/JavaOPs/topjava" target=_blank>Maven/ Spring/ Security/ JPA(Hibernate)/ Jackson/jQuery</a>
++app.login=Зайти как
++
++user.title=Пользователи
++user.name=Имя
++user.email=Почта
++user.roles=Роли
++user.active=Активный
++user.registered=Зарегистрирован
++
++meal.title=Моя еда
++
++common.select=Выбрать
+\ No newline at end of file
+Index: src/main/resources/messages/app_ru.properties
+===================================================================
+--- src/main/resources/messages/app_ru.properties	(date 1523304883000)
++++ src/main/resources/messages/app_ru.properties	(date 1523304883000)
+@@ -1,15 +0,0 @@
+-app.title=\u041F\u043E\u0434\u0441\u0447\u0435\u0442 \u043A\u0430\u043B\u043E\u0440\u0438\u0439
+-app.home=\u0413\u043B\u0430\u0432\u043D\u0430\u044F
+-app.footer=\u041F\u0440\u0438\u043B\u043E\u0436\u0435\u043D\u0438\u0435 \u043F\u043E \u043F\u0440\u043E\u0435\u043A\u0442\u0443 <a href="https://github.com/JavaOPs/topjava" target=_blank>Maven/ Spring/ Security/ JPA(Hibernate)/ Jackson/jQuery</a>
+-app.login=\u0417\u0430\u0439\u0442\u0438 \u043A\u0430\u043A
+-
+-user.title=\u041F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u0442\u0435\u043B\u0438
+-user.name=\u0418\u043C\u044F
+-user.email=\u041F\u043E\u0447\u0442\u0430
+-user.roles=\u0420\u043E\u043B\u0438
+-user.active=\u0410\u043A\u0442\u0438\u0432\u043D\u044B\u0439
+-user.registered=\u0417\u0430\u0440\u0435\u0433\u0438\u0441\u0442\u0440\u0438\u0440\u043E\u0432\u0430\u043D
+-
+-meal.title=\u041C\u043E\u044F \u0435\u0434\u0430
+-
+-common.select=\u0412\u044B\u0431\u0440\u0430\u0442\u044C
+\ No newline at end of file
+Index: src/main/webapp/WEB-INF/jsp/users.jsp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/WEB-INF/jsp/users.jsp	(date 1523304883000)
++++ src/main/webapp/WEB-INF/jsp/users.jsp	(date 1523304989090)
+@@ -1,8 +1,7 @@
+ <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+ <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+ <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+-
+-<fmt:setBundle basename="messages.app"/>
++<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+ 
+ <html>
+ <jsp:include page="fragments/headTag.jsp"/>
+@@ -10,16 +9,16 @@
+ <jsp:include page="fragments/bodyHeader.jsp"/>
+ 
+ <section>
+-    <h3><fmt:message key="user.title"/></h3>
++    <h3><spring:message code="user.title"/></h3>
+ 
+     <table border="1" cellpadding="8" cellspacing="0">
+         <thead>
+         <tr>
+-            <th><fmt:message key="user.name"/></th>
+-            <th><fmt:message key="user.email"/></th>
+-            <th><fmt:message key="user.roles"/></th>
+-            <th><fmt:message key="user.active"/></th>
+-            <th><fmt:message key="user.registered"/></th>
++            <th><spring:message code="user.name"/></th>
++            <th><spring:message code="user.email"/></th>
++            <th><spring:message code="user.roles"/></th>
++            <th><spring:message code="user.active"/></th>
++            <th><spring:message code="user.registered"/></th>
+         </tr>
+         </thead>
+         <c:forEach items="${users}" var="user">
+Index: src/main/resources/spring/spring-mvc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/resources/spring/spring-mvc.xml	(date 1523304883000)
++++ src/main/resources/spring/spring-mvc.xml	(date 1523304989032)
+@@ -15,4 +15,22 @@
+     <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+           p:prefix="/WEB-INF/jsp/"
+           p:suffix=".jsp"/>
++
++<!--
++    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource"
++          p:cacheSeconds="60"
++          p:defaultEncoding="UTF-8">
++        <property name="basenames">
++            <list>
++                <value>messages/app</value>
++            </list>
++        </property>
++    </bean>
++-->
++    <bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource"
++          p:cacheSeconds="5"
++          p:defaultEncoding="UTF-8">
++        <property name="basenames" value="file:///#{systemEnvironment['TOPJAVA_ROOT']}/config/messages/app"/>
++        <property name="fallbackToSystemLocale" value="false"/>
++    </bean>
+ </beans>
+\ No newline at end of file
+Index: src/main/webapp/WEB-INF/jsp/index.jsp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/WEB-INF/jsp/index.jsp	(date 1523304883000)
++++ src/main/webapp/WEB-INF/jsp/index.jsp	(date 1523304989080)
+@@ -1,8 +1,6 @@
+ <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+ <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+-
+-<fmt:setBundle basename="messages.app"/>
++<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+ 
+ <html>
+ <jsp:include page="fragments/headTag.jsp"/>
+@@ -10,15 +8,15 @@
+ <jsp:include page="fragments/bodyHeader.jsp"/>
+ <section>
+     <form method="post" action="users">
+-        <fmt:message key="app.login"/>: <select name="userId">
++        <spring:message code="app.login"/>: <select name="userId">
+     <option value="100000" selected>User</option>
+     <option value="100001">Admin</option>
+ </select>
+-        <button type="submit"><fmt:message key="common.select"/></button>
++        <button type="submit"><spring:message code="common.select"/></button>
+ </form>
+ <ul>
+-    <li><a href="users"><fmt:message key="user.title"/></a></li>
+-    <li><a href="meals"><fmt:message key="meal.title"/></a></li>
++    <li><a href="users"><spring:message code="user.title"/></a></li>
++    <li><a href="meals"><spring:message code="meal.title"/></a></li>
+ </ul>
+ </section>
+ <jsp:include page="fragments/footer.jsp"/>
+Index: src/main/resources/messages/app.properties
+===================================================================
+--- src/main/resources/messages/app.properties	(date 1523304883000)
++++ config/messages/app.properties	(date 1523299227032)
+@@ -1,0 +1,0 @@
+Index: src/main/webapp/WEB-INF/jsp/fragments/headTag.jsp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/WEB-INF/jsp/fragments/headTag.jsp	(date 1523304883000)
++++ src/main/webapp/WEB-INF/jsp/fragments/headTag.jsp	(date 1523304989070)
+@@ -1,10 +1,9 @@
+ <%@page contentType="text/html" pageEncoding="UTF-8" %>
+-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
++<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+ <%@ taglib prefix="c" uri="http://java.sun.com/jstl/core" %>
+-<fmt:setBundle basename="messages.app"/>
+ 
+ <head>
+     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+-    <title><fmt:message key="app.title"/></title>
++    <title><spring:message code="app.title"/></title>
+     <link rel="stylesheet" href="resources/css/style.css">
+ </head>
+\ No newline at end of file
+Index: src/main/webapp/WEB-INF/jsp/fragments/footer.jsp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/WEB-INF/jsp/fragments/footer.jsp	(date 1523304883000)
++++ src/main/webapp/WEB-INF/jsp/fragments/footer.jsp	(date 1523304989060)
+@@ -1,5 +1,4 @@
+ <%@page contentType="text/html" pageEncoding="UTF-8" %>
+-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+-<fmt:setBundle basename="messages.app"/>
++<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+ <hr>
+-<footer><fmt:message key="app.footer"/></footer>
+\ No newline at end of file
++<footer><spring:message code="app.footer"/></footer>
+\ No newline at end of file
+Index: src/main/webapp/WEB-INF/jsp/fragments/bodyHeader.jsp
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- src/main/webapp/WEB-INF/jsp/fragments/bodyHeader.jsp	(date 1523304883000)
++++ src/main/webapp/WEB-INF/jsp/fragments/bodyHeader.jsp	(date 1523304989050)
+@@ -1,5 +1,4 @@
+ <%@page contentType="text/html" pageEncoding="UTF-8" %>
+-<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
++<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+ 
+-<fmt:setBundle basename="messages.app"/>
+-<header><a href="${pageContext.request.contextPath}/"><fmt:message key="app.home"/></a>&nbsp;|&nbsp;<a href="meals"><fmt:message key="app.title"/></a></header>
+\ No newline at end of file
++<header><a href="${pageContext.request.contextPath}/"><spring:message code="app.home"/></a>&nbsp;|&nbsp;<a href="meals"><spring:message code="app.title"/></a></header>
+\ No newline at end of file
