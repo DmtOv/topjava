@@ -10,7 +10,7 @@
 <body>
 <section>
     <h3>Meals</h3>
-    <form method="post" action="meals?action=filter">
+    <form method="post" action="filter">
         <dl>
             <dt>From Date:</dt>
             <dd><input type="date" name="startDate" value="${param.startDate}"></dd>
@@ -30,7 +30,7 @@
         <button type="submit">Filter</button>
     </form>
     <hr/>
-    <a href="/topjava/create">Add Meal</a>
+    <a href="create">Add Meal</a>
     <hr/>
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>
