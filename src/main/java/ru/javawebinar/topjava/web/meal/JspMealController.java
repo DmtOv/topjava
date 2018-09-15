@@ -23,27 +23,31 @@ public class JspMealController extends AbstractMealRestController {
         return "meals";
     }
 
-    @GetMapping("/create")
-    public String fillModelCreate(final Model model) {
-        model.addAttribute("meal", new Meal(LocalDateTime.now(), "", 0));
-        return "mealForm";
+    private String getMealId(final HttpServletRequest request) {
+        return request.getParameter("id");
     }
 
-    @GetMapping("/update")
-    public String fillModelUpdate(final HttpServletRequest request, final Model model) {
-        model.addAttribute("meal", super.get(Integer.valueOf(request.getParameter("id"))));
+    @GetMapping({"/create", "/update"})
+    public String fillModelCreate(final HttpServletRequest request, final Model model) {
+        final String attributeName = "meal";
+        final String id = getMealId(request);
+        if (StringUtils.isEmpty(id)) {
+            model.addAttribute(attributeName, new Meal(LocalDateTime.now(), "", 0));
+        } else {
+            model.addAttribute(attributeName, super.get(Integer.valueOf(getMealId(request))));
+        }
         return "mealForm";
     }
 
     @GetMapping("/delete")
     public String delete(final HttpServletRequest request) {
-        super.delete(Integer.valueOf(request.getParameter("id")));
+        super.delete(Integer.valueOf(getMealId(request)));
         return "redirect:meals";
     }
 
     @PostMapping("/meals")
     public String create(final HttpServletRequest request) {
-        final String id = request.getParameter("id");
+        final String id = getMealId(request);
         final Meal meal = new Meal(
                 LocalDateTime.parse(request.getParameter("dateTime")),
                 request.getParameter("description"),
