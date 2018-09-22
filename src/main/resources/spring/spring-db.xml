@@ -48,8 +48,9 @@
         <context:property-placeholder location="classpath:db/tomcat.properties" system-properties-mode="OVERRIDE"/>
     </beans>
 
+    <!--<tx:annotation-driven/>-->
+
     <beans profile="jdbc">
-        <tx:annotation-driven/>
         <context:component-scan base-package="ru.javawebinar.**.repository.jdbc"/>
         <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
             <constructor-arg ref="dataSource"/>
@@ -63,6 +64,9 @@
     </beans>
 
     <beans profile="jpa,datajpa">
+        <tx:annotation-driven/>
+
+
         <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
               p:dataSource-ref="dataSource"
               p:packagesToScan="ru.javawebinar.**.model">

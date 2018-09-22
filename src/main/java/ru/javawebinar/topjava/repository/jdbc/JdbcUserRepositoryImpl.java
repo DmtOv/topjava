@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
@@ -18,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Repository
+@Transactional(readOnly = true)
 public class JdbcUserRepositoryImpl implements UserRepository {
 
     private static final BeanPropertyRowMapper<User> ROW_MAPPER = BeanPropertyRowMapper.newInstance(User.class);
@@ -39,6 +41,7 @@ public class JdbcUserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    @Transactional
     public User save(User user) {
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
 
@@ -68,26 +71,28 @@ public class JdbcUserRepositoryImpl implements UserRepository {
     }
 
     @Override
+    @Transactional
     public boolean delete(int id) {
         return jdbcTemplate.update("DELETE FROM users WHERE id=?", id) != 0;
     }
 
     @Override
-    public User get(int id) {
-        User user = DataAccessUtils.singleResult(jdbcTemplate.query("SELECT * FROM users WHERE id=?", ROW_MAPPER, id));
-        user.setRoles(getRoles(id));
+    public User get(final int id) {
+        final User user = DataAccessUtils.singleResult(jdbcTemplate.query("SELECT * FROM users WHERE id=?", ROW_MAPPER, id));
+        if (Objects.nonNull(user)) {
+            user.setRoles(getRoles(id));
+        }
         return user;
     }
 
-    private Set<Role> getRoles(int id) {
-        List<String> roles = jdbcTemplate.query("SELECT role FROM user_roles WHERE user_id=?",
-                BeanPropertyRowMapper.newInstance(String.class), id);
-        return roles.stream().map(Role::valueOf).collect(Collectors.toSet());
+    private Set<Role> getRoles(final int id) {
+        final String role = "role";
+        return new HashSet<>(jdbcTemplate.query("SELECT role FROM user_roles WHERE user_id=?",
+                (rs, rowNum) -> Role.valueOf(rs.getString(role)), id));
     }
 
     @Override
     public User getByEmail(String email) {
-//        return jdbcTemplate.queryForObject("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
         List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
         User user = DataAccessUtils.singleResult(users);
         user.setRoles(getRoles(user.getId()));
@@ -96,22 +101,20 @@ public class JdbcUserRepositoryImpl implements UserRepository {
 
     @Override
     public List<User> getAll() {
-        List<User> users = jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", ROW_MAPPER);
+        final  List<User> users = jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", ROW_MAPPER);
+        final  List<Integer> ids = users.stream().map(User::getId).collect(Collectors.toList());
+        final  Map<Integer, Set<Role>> usRoles = new HashMap<>();
 
-        List<Integer> ids = users.stream().map(User::getId).collect(Collectors.toList());
-
-        Map<Integer, Set<Role>> usRoles = new HashMap<>();
-
-        namedParameterJdbcTemplate.query("select * from user_roles WHERE user_id in (:ids)",
+        namedParameterJdbcTemplate.query("SELECT * FROM user_roles WHERE user_id in (:ids)",
                 new MapSqlParameterSource("ids", ids),
                 rs -> {
-                    int id = rs.getInt(1);
-                    String role = rs.getString(2);
+                    final int id = rs.getInt("user_id");
+                    final String role = rs.getString("role");
 
                     if (usRoles.containsKey(id)) {
-                        users.get(id).getRoles().add(Role.valueOf(role));
+                        usRoles.get(id).add(Role.valueOf(role));
                     } else {
-                        Set<Role> roles = new HashSet<>(Arrays.asList(Role.valueOf(role)));
+                        Set<Role> roles = new HashSet<>(Collections.singletonList(Role.valueOf(role)));
                         usRoles.put(id, roles);
                     }
                 });
