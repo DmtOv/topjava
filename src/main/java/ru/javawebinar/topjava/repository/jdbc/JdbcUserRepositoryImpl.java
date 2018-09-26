@@ -48,18 +48,23 @@ public class JdbcUserRepositoryImpl implements UserRepository {
         if (user.isNew()) {
             Number newKey = insertUser.executeAndReturnKey(parameterSource);
             user.setId(newKey.intValue());
-        } else if (namedParameterJdbcTemplate.update(
-                "UPDATE users SET name=:name, email=:email, password=:password, " +
-                        "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource) == 0) {
-            return null;
+            saveRoles(user);
+        } else {
+            final int count = namedParameterJdbcTemplate.update(
+                    "UPDATE users SET name=:name, email=:email, password=:password, " +
+                            "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource);
+            if (count == 0) {
+                return null;
+            } else {
+                deleteRoles(user);
+                saveRoles(user);
+            }
         }
-        saveRoles(user);
+
         return user;
     }
 
     private void saveRoles(User user) {
-        jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", user.getId());
-
         final Set<Role> roles = user.getRoles();
         if (roles.size() > 0) {
             jdbcTemplate.batchUpdate("INSERT INTO user_roles (user_id, role) VALUES (?, ?)", roles, roles.size(),
@@ -68,6 +73,10 @@ public class JdbcUserRepositoryImpl implements UserRepository {
                         preparedStatement.setString(2, role.name());
                     });
         }
+    }
+
+    private void deleteRoles(User user) {
+        jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", user.getId());
     }
 
     @Override
@@ -79,31 +88,30 @@ public class JdbcUserRepositoryImpl implements UserRepository {
     @Override
     public User get(final int id) {
         final User user = DataAccessUtils.singleResult(jdbcTemplate.query("SELECT * FROM users WHERE id=?", ROW_MAPPER, id));
-        if (Objects.nonNull(user)) {
-            user.setRoles(getRoles(id));
-        }
+        fillRoles(user);
         return user;
     }
 
-    private Set<Role> getRoles(final int id) {
-        final String role = "role";
-        return new HashSet<>(jdbcTemplate.query("SELECT role FROM user_roles WHERE user_id=?",
-                (rs, rowNum) -> Role.valueOf(rs.getString(role)), id));
+    private void fillRoles(User user) {
+        if (Objects.nonNull(user)) {
+            user.setRoles(jdbcTemplate.query("SELECT role FROM user_roles WHERE user_id=?",
+                    (rs, rowNum) -> Role.valueOf(rs.getString("role")), user.getId()));
+        }
     }
 
     @Override
     public User getByEmail(String email) {
         List<User> users = jdbcTemplate.query("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
         User user = DataAccessUtils.singleResult(users);
-        user.setRoles(getRoles(user.getId()));
+        fillRoles(user);
         return user;
     }
 
     @Override
     public List<User> getAll() {
-        final  List<User> users = jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", ROW_MAPPER);
-        final  List<Integer> ids = users.stream().map(User::getId).collect(Collectors.toList());
-        final  Map<Integer, Set<Role>> usRoles = new HashMap<>();
+        final List<User> users = jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", ROW_MAPPER);
+        final List<Integer> ids = users.stream().map(User::getId).collect(Collectors.toList());
+        final Map<Integer, Set<Role>> usRoles = new HashMap<>();
 
         namedParameterJdbcTemplate.query("SELECT * FROM user_roles WHERE user_id in (:ids)",
                 new MapSqlParameterSource("ids", ids),

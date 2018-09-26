@@ -29,13 +29,9 @@ public class JspMealController extends AbstractMealRestController {
 
     @GetMapping({"/create", "/update"})
     public String fillModelCreate(final HttpServletRequest request, final Model model) {
-        final String attributeName = "meal";
-        final String id = getMealId(request);
-        if (StringUtils.isEmpty(id)) {
-            model.addAttribute(attributeName, new Meal(LocalDateTime.now(), "", 0));
-        } else {
-            model.addAttribute(attributeName, super.get(Integer.valueOf(getMealId(request))));
-        }
+        model.addAttribute("meal",
+                StringUtils.isEmpty(getMealId(request)) ?
+                        new Meal(LocalDateTime.now(), "", 0) : super.get(Integer.valueOf(getMealId(request))));
         return "mealForm";
     }
 
