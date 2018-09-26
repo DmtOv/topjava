@@ -64,21 +64,6 @@ public class JdbcUserRepositoryImpl implements UserRepository {
         return user;
     }
 
-    private void saveRoles(User user) {
-        final Set<Role> roles = user.getRoles();
-        if (roles.size() > 0) {
-            jdbcTemplate.batchUpdate("INSERT INTO user_roles (user_id, role) VALUES (?, ?)", roles, roles.size(),
-                    (preparedStatement, role) -> {
-                        preparedStatement.setInt(1, user.getId());
-                        preparedStatement.setString(2, role.name());
-                    });
-        }
-    }
-
-    private void deleteRoles(User user) {
-        jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", user.getId());
-    }
-
     @Override
     @Transactional
     public boolean delete(int id) {
@@ -90,13 +75,6 @@ public class JdbcUserRepositoryImpl implements UserRepository {
         final User user = DataAccessUtils.singleResult(jdbcTemplate.query("SELECT * FROM users WHERE id=?", ROW_MAPPER, id));
         fillRoles(user);
         return user;
-    }
-
-    private void fillRoles(User user) {
-        if (Objects.nonNull(user)) {
-            user.setRoles(jdbcTemplate.query("SELECT role FROM user_roles WHERE user_id=?",
-                    (rs, rowNum) -> Role.valueOf(rs.getString("role")), user.getId()));
-        }
     }
 
     @Override
@@ -130,5 +108,27 @@ public class JdbcUserRepositoryImpl implements UserRepository {
             user.setRoles(usRoles.get(user.getId()));
         }
         return users;
+    }
+
+    private void saveRoles(User user) {
+        final Set<Role> roles = user.getRoles();
+        if (roles.size() > 0) {
+            jdbcTemplate.batchUpdate("INSERT INTO user_roles (user_id, role) VALUES (?, ?)", roles, roles.size(),
+                    (preparedStatement, role) -> {
+                        preparedStatement.setInt(1, user.getId());
+                        preparedStatement.setString(2, role.name());
+                    });
+        }
+    }
+
+    private void deleteRoles(User user) {
+        jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", user.getId());
+    }
+
+    private void fillRoles(User user) {
+        if (Objects.nonNull(user)) {
+            user.setRoles(jdbcTemplate.query("SELECT role FROM user_roles WHERE user_id=?",
+                    (rs, rowNum) -> Role.valueOf(rs.getString("role")), user.getId()));
+        }
     }
 }
