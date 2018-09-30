@@ -18,6 +18,8 @@
         <jdbc:script encoding="utf-8" location="classpath:db/populateDB.sql"/>
     </jdbc:initialize-database>
 
+    <tx:annotation-driven/>
+
     <!-- Choose profile from (hsqldb, postgres) and (jdbc,datajpa,jpa) -->
 
     <beans profile="hsqldb">
@@ -48,10 +50,7 @@
         <context:property-placeholder location="classpath:db/tomcat.properties" system-properties-mode="OVERRIDE"/>
     </beans>
 
-
     <beans profile="jdbc">
-
-        <tx:annotation-driven/>
 
         <context:component-scan base-package="ru.javawebinar.**.repository.jdbc"/>
         <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
@@ -66,8 +65,6 @@
     </beans>
 
     <beans profile="jpa,datajpa">
-        <tx:annotation-driven/>
-
 
         <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
               p:dataSource-ref="dataSource"
